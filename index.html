@@ -326,7 +326,7 @@ footer {
       <div class="stat-row">
         <span class="stat-label">منشورات هذا الشهر</span>
         <span class="stat-value red">
-          {{ site.posts | where_exp: "p", "p.date >= site.time | date_to_xmlschema | slice: 0, 7" | size }}
+          {{ site.posts.size }}
         </span>
       </div>
       <div class="stat-row">
