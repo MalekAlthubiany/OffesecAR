@@ -1,0 +1,72 @@
+---
+layout: none
+---
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ page.title }} · OffsecAR</title>
+<meta property="og:title" content="{{ page.title }}">
+{% if page.image %}<meta property="og:image" content="{{ page.image | prepend: site.url }}">{% endif %}
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Sans+Arabic:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0c0c;--bg2:#141414;--red:#e03c2a;--white:#f0ede8;--muted:#6b6b6b;--border:rgba(255,255,255,0.07);--serif:'Noto Naskh Arabic',serif;--sans:'Noto Sans Arabic',sans-serif;--mono:'IBM Plex Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--white);font-family:var(--sans);line-height:1.8;-webkit-font-smoothing:antialiased;}
+a{color:inherit;text-decoration:none;}
+nav{position:sticky;top:0;z-index:100;background:rgba(12,12,12,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:60px;}
+.nav-logo{font-weight:900;font-size:18px;display:flex;align-items:center;gap:10px;}
+.nav-logo span{width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;}
+.nav-links{display:flex;gap:28px;font-size:13px;color:var(--muted);}
+.nav-links a:hover{color:var(--white);}
+.article-wrap{max-width:700px;margin:0 auto;padding:60px 5%;}
+.article-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.tag{font-size:10px;font-weight:600;color:var(--red);border:1px solid rgba(224,60,42,0.4);border-radius:4px;padding:3px 9px;letter-spacing:.08em;direction:ltr;}
+.date{font-size:12px;color:var(--muted);font-family:var(--mono);direction:ltr;}
+h1{font-family:var(--serif);font-size:clamp(24px,3.5vw,42px);font-weight:700;line-height:1.5;margin-bottom:24px;}
+.severity-row{display:flex;align-items:center;gap:10px;margin-bottom:32px;flex-wrap:wrap;}
+.badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:5px;direction:ltr;}
+.sev-critical{background:rgba(224,60,42,.12);color:#e03c2a;border:1px solid rgba(224,60,42,.25);}
+.sev-high{background:rgba(232,136,78,.12);color:#e8884e;border:1px solid rgba(232,136,78,.25);}
+.sev-medium{background:rgba(232,196,78,.12);color:#c8a430;border:1px solid rgba(232,196,78,.25);}
+.post-image{margin-bottom:36px;border-radius:12px;overflow:hidden;border:1px solid var(--border);}
+.post-image img{width:100%;display:block;}
+.content{font-size:17px;font-weight:300;color:rgba(240,237,232,.85);line-height:1.9;}
+.content p{margin-bottom:1.4em;}
+hr{border:none;border-top:1px solid var(--border);margin:32px 0;}
+.sources{font-size:13px;color:var(--muted);}
+.sources a{color:var(--red);}
+.tweet-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;border:1px solid var(--border);border-radius:6px;padding:6px 14px;color:var(--muted);transition:all .2s;margin-top:24px;}
+.tweet-link:hover{color:var(--white);border-color:rgba(255,255,255,.2);}
+footer{border-top:1px solid var(--border);padding:28px 5%;display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-logo"><span></span>OffsecAR</a>
+  <div class="nav-links"><a href="/">الرئيسية</a><a href="/archive">الأرشيف</a></div>
+</nav>
+<article class="article-wrap">
+  <div class="article-eyebrow">
+    <span class="tag">{{ page.category | upcase }}</span>
+    <span class="date">{{ page.date | date: "%d %b %Y" }}</span>
+    {% if page.cve and page.cve != "" %}<span class="date" style="color:var(--red)">{{ page.cve }}</span>{% endif %}
+  </div>
+  <h1>{{ page.title }}</h1>
+  <div class="severity-row">
+    {% if page.severity %}<span class="badge sev-{{ page.severity_en }}">خطورة {{ page.severity }}{% if page.cvss and page.cvss != "" %} · CVSS {{ page.cvss }}{% endif %}</span>{% endif %}
+    {% if page.source_url and page.source_url != "" %}<a href="{{ page.source_url }}" class="badge" style="background:var(--bg2);color:var(--muted);border:1px solid var(--border)" target="_blank">{{ page.source }} ↗</a>{% endif %}
+  </div>
+  {% if page.image %}<div class="post-image"><img src="{{ page.image }}" alt="{{ page.title }}"></div>{% endif %}
+  <div class="content">{{ content }}</div>
+  {% if page.tweet_url and page.tweet_url != "" %}
+  <a href="{{ page.tweet_url }}" class="tweet-link" target="_blank" dir="ltr">↗ شاهد على Twitter / X</a>
+  {% endif %}
+</article>
+<footer>
+  <a href="/" style="font-weight:700;color:var(--white)">OffsecAR</a>
+  <span dir="ltr">offsec-ar.github.io</span>
+</footer>
+</body>
+</html>
