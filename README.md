@@ -1,83 +1,57 @@
+<div align="center">
+
 # OffsecAR
+### أول مرجع عربي يومي لـ Offensive Security
 
-نظام نشر يومي تلقائي لأخبار Offensive Security بالعربي.
+[![يومي وتلقائي](https://img.shields.io/badge/تحديث-يومي-e03c2a?style=flat-square)](https://malekalthubiany.github.io/OffsecAR)
+[![المحتوى عربي](https://img.shields.io/badge/المحتوى-عربي_100%25-1a1a1a?style=flat-square)](https://malekalthubiany.github.io/OffsecAR)
+[![Offensive Security](https://img.shields.io/badge/التخصص-Offensive_Security-e03c2a?style=flat-square)](https://malekalthubiany.github.io/OffsecAR)
 
-## كيف يعمل
-
-```
-كل يوم الساعة 8 صباحاً (الرياض)
-     │
-     ▼
-🔍 يجمع أخبار من: Exploit-DB، BleepingComputer، NVD، HackerNews...
-     │
-     ▼
-✍️  Claude يختار الخبر الأبرز ويكتبه بأسلوب ثمانية بالعربي
-     │
-     ▼
-🎨  يصمم صورة 1080×1080 بأسلوب editorial داكن
-     │
-     ▼
-🐦  ينشر على Twitter / X
-     │
-     ▼
-📝  يضيف المنشور لموقع GitHub Pages
-```
+</div>
 
 ---
 
-## الإعداد (خطوة بخطوة)
+## من نحن
 
-### 1. انشئ الريبو على GitHub
-```bash
-git clone https://github.com/YourUsername/OffsecAR
-cd OffsecAR
-```
+**OffsecAR** مجتمع ومنصة محتوى متخصصة في الأمن الهجومي، تكتب بالعربي وتخاطب المختص العربي مباشرة.
 
-### 2. فعّل GitHub Pages
-- اذهب لـ Settings → Pages
-- اختر: Source → **GitHub Actions**
-
-### 3. أضف الـ Secrets
-اذهب لـ Settings → Secrets and variables → Actions، أضف:
-
-| Secret | القيمة |
-|--------|--------|
-| `ANTHROPIC_API_KEY` | مفتاح Anthropic |
-| `TWITTER_API_KEY` | من developer.twitter.com |
-| `TWITTER_API_SECRET` | من developer.twitter.com |
-| `TWITTER_ACCESS_TOKEN` | من developer.twitter.com |
-| `TWITTER_ACCESS_TOKEN_SECRET` | من developer.twitter.com |
-| `TWITTER_HANDLE` | مثال: `@YourHandle` |
-
-### 4. Twitter Developer Account
-- اشترك في **Basic Plan** (~$100/شهر) — ضروري للنشر التلقائي
-- أنشئ App وفعّل **Read and Write** permissions
-- أنشئ Access Tokens
-
-### 5. ارفع الكود
-```bash
-git add .
-git commit -m "initial setup"
-git push origin main
-```
+نؤمن أن المحتوى التقني العميق لا يجب أن يكون حكرًا على من يقرأ الإنجليزية. كل ثغرة، كل تقنية هجوم، كل أداة Red Team — نحللها ونقدمها بأسلوب عربي رصين.
 
 ---
 
-## تشغيل يدوي
+## هدفنا
 
-من Actions → "نشر يومي" → **Run workflow**
+نشر ثقافة الأمن الهجومي في العالم العربي من خلال محتوى يومي موثوق — لا ترجمات آلية، لا مقالات سطحية، بل تحليل حقيقي يخدم المختص.
 
 ---
 
-## هيكل الملفات
+## ما الذي نقدمه
 
-```
-OffsecAR/
-├── .github/workflows/daily_post.yml   # الجدولة اليومية
-├── scripts/daily_post.py              # السكريبت الرئيسي
-├── _posts/                            # المنشورات (تُنشأ تلقائياً)
-├── assets/images/                     # صور تويتر (تُنشأ تلقائياً)
-├── _layouts/post.html                 # قالب المنشور
-├── index.html                         # الصفحة الرئيسية
-└── _config.yml                        # إعدادات Jekyll
-```
+**أخبار يومية** — أبرز ثغرة أو هجوم أو CVE كل يوم، محللة بأسلوب تحليلي لا إخباري فقط.
+
+**مقالات Blogs** — موضوع تقني عميق كل يوم: منهجيات Red Team، تقنيات هجوم، أدوات، وتحليلات APT. كل شيء بالعربي.
+
+**مكان واحد** — بدل ما تتابع عشرين مصدر إنجليزي، تلاقي كل اللي يهمك هنا، مصفّى ومكتوب بلغتك.
+
+---
+
+## ما يميزنا
+
+| | OffsecAR | غيرنا |
+|---|---|---|
+| اللغة | عربي 100% | إنجليزي أو ترجمة آلية |
+| التحديث | يومي وتلقائي | متقطع وغير منتظم |
+| الأسلوب | تحليلي عميق | إخباري سطحي |
+| التخصص | Offensive Security فقط | عام ومشتت |
+
+---
+
+## تابعنا
+
+🌐 [الموقع](https://malekalthubiany.github.io/OffsecAR) &nbsp;·&nbsp; 🐦 [Twitter / X](https://twitter.com/malekvapt)
+
+---
+
+<div align="center">
+<sub>يُنشر المحتوى تلقائياً كل يوم الساعة 8 صباحاً بتوقيت الرياض</sub>
+</div>
