@@ -1,0 +1,164 @@
+---
+layout: none
+permalink: /blogs/
+---
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blogs · OffsecAR</title>
+<meta name="description" content="مقالات تقنية عميقة في Offensive Security بالعربي">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Sans+Arabic:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0c0c;--bg2:#141414;--bg3:#1c1c1c;--red:#e03c2a;--white:#f0ede8;--muted:#6b6b6b;--border:rgba(255,255,255,0.07);--serif:'Noto Naskh Arabic',serif;--sans:'Noto Sans Arabic',sans-serif;--mono:'IBM Plex Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--white);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+a{color:inherit;text-decoration:none;}
+nav{position:sticky;top:0;z-index:100;background:rgba(12,12,12,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:60px;}
+.nav-logo{font-weight:900;font-size:18px;display:flex;align-items:center;gap:10px;}
+.nav-logo span{width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.nav-links{display:flex;gap:24px;font-size:13px;color:var(--muted);}
+.nav-links a:hover{color:var(--white);}
+.nav-links a.active{color:var(--red);}
+
+/* هيدر الصفحة */
+.page-header{padding:60px 5% 48px;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+.page-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 80% at 95% 50%,rgba(224,60,42,0.05) 0%,transparent 70%);pointer-events:none;}
+.page-eyebrow{font-size:10px;font-weight:600;color:var(--red);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;direction:ltr;}
+.page-title{font-family:var(--serif);font-size:clamp(32px,5vw,56px);font-weight:700;line-height:1.3;margin-bottom:14px;}
+.page-title span{color:var(--red);}
+.page-desc{font-size:16px;font-weight:300;color:rgba(240,237,232,.5);max-width:500px;line-height:1.8;}
+
+/* فلاتر التصنيف */
+.filters{display:flex;gap:8px;padding:24px 5%;border-bottom:1px solid var(--border);overflow-x:auto;flex-wrap:wrap;}
+.filter-btn{font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .2s;background:transparent;white-space:nowrap;}
+.filter-btn:hover,.filter-btn.active{color:var(--white);border-color:var(--red);background:rgba(224,60,42,.1);}
+
+/* شبكة المقالات */
+.blogs-grid{max-width:1100px;margin:0 auto;padding:48px 5%;}
+.grid-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+.grid-title{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;direction:ltr;}
+.grid-count{font-size:12px;color:var(--muted);font-family:var(--mono);}
+
+.blogs-list{display:flex;flex-direction:column;gap:0;}
+
+/* بطاقة المقالة */
+.blog-card{display:grid;grid-template-columns:64px 1fr auto;gap:20px;align-items:start;padding:24px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;}
+.blog-card:last-child{border-bottom:none;}
+.blog-card:hover .blog-title{color:var(--red);}
+.blog-card:hover .blog-arrow{opacity:1;transform:translateX(-4px);}
+
+.blog-num{font-family:var(--mono);font-size:11px;color:var(--muted);padding-top:4px;direction:ltr;}
+
+.blog-body{}
+.blog-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.blog-cat{font-size:10px;font-weight:600;color:var(--red);border:1px solid rgba(224,60,42,.35);border-radius:3px;padding:2px 7px;letter-spacing:.06em;}
+.blog-date{font-size:11px;color:var(--muted);font-family:var(--mono);}
+.blog-read{font-size:11px;color:var(--muted);font-family:var(--mono);}
+
+.blog-title{font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.5;margin-bottom:8px;transition:color .2s;}
+.blog-excerpt{font-size:13.5px;font-weight:300;color:rgba(240,237,232,.5);line-height:1.75;max-width:560px;}
+
+.blog-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px;}
+.blog-tag{font-size:10px;color:var(--muted);border:1px solid var(--border);border-radius:3px;padding:2px 7px;}
+
+.blog-arrow{font-size:16px;color:var(--muted);opacity:0;transform:translateX(0);transition:all .2s;padding-top:4px;}
+
+/* empty state */
+.empty{text-align:center;padding:80px 20px;color:var(--muted);}
+.empty-icon{font-size:40px;margin-bottom:16px;opacity:.3;}
+.empty-text{font-size:15px;}
+
+footer{border-top:1px solid var(--border);padding:28px 5%;display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/OffsecAR/" class="nav-logo"><span></span>OffsecAR</a>
+  <div class="nav-links">
+    <a href="/OffsecAR/">الرئيسية</a>
+    <a href="/OffsecAR/blogs" class="active">Blogs</a>
+    <a href="/OffsecAR/archive">الأرشيف</a>
+    <a href="https://twitter.com/malekvapt" target="_blank" dir="ltr">Twitter / X</a>
+  </div>
+</nav>
+
+<header class="page-header">
+  <div class="page-eyebrow">BLOGS · مقالات تقنية</div>
+  <h1 class="page-title">تعمّق في <span>Offensive Security</span></h1>
+  <p class="page-desc">مقالات تقنية عميقة تُكتب يومياً — منهجيات، أدوات، تقنيات هجوم، وتحليلات.</p>
+</header>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="filterBlogs('all', this)">الكل</button>
+  <button class="filter-btn" onclick="filterBlogs('منهجية', this)">منهجية</button>
+  <button class="filter-btn" onclick="filterBlogs('تقنية', this)">تقنية</button>
+  <button class="filter-btn" onclick="filterBlogs('أداة', this)">أدوات</button>
+  <button class="filter-btn" onclick="filterBlogs('تحليل', this)">تحليل</button>
+</div>
+
+<div class="blogs-grid">
+  <div class="grid-header">
+    <span class="grid-title">ALL POSTS</span>
+    <span class="grid-count" id="count">{% assign blog_posts = site.blogs %}{{ blog_posts | size }} مقالة</span>
+  </div>
+
+  <div class="blogs-list" id="blogs-list">
+    {% assign blog_posts = site.blogs | sort: 'date' | reverse %}
+    {% if blog_posts.size > 0 %}
+      {% for post in blog_posts %}
+      <article class="blog-card" data-category="{{ post.category }}" onclick="location.href='{{ post.url | prepend: site.baseurl }}'">
+        <div class="blog-num">{{ forloop.index | prepend: "0" | slice: -2, 2 }}</div>
+        <div class="blog-body">
+          <div class="blog-meta">
+            <span class="blog-cat">{{ post.category }}</span>
+            <span class="blog-date">{{ post.date | date: "%d %b %Y" }}</span>
+            <span class="blog-read">· {{ post.read_time }} د</span>
+          </div>
+          <h2 class="blog-title">{{ post.title }}</h2>
+          <p class="blog-excerpt">{{ post.excerpt | truncatewords: 25 }}</p>
+          {% if post.tags %}
+          <div class="blog-tags">
+            {% for tag in post.tags limit: 3 %}
+            <span class="blog-tag">{{ tag }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        <div class="blog-arrow">←</div>
+      </article>
+      {% endfor %}
+    {% else %}
+      <div class="empty">
+        <div class="empty-icon">📝</div>
+        <p class="empty-text">المقالات تُنشر يومياً — تعال غداً</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<footer>
+  <a href="/OffsecAR/" style="font-weight:700;color:var(--white)">OffsecAR</a>
+  <span>مقالات Offensive Security يومياً بالعربي</span>
+  <span dir="ltr">malekalthubiany.github.io/OffsecAR</span>
+</footer>
+
+<script>
+function filterBlogs(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cards = document.querySelectorAll('.blog-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const show = cat === 'all' || card.dataset.category === cat;
+    card.style.display = show ? 'grid' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('count').textContent = visible + ' مقالة';
+}
+</script>
+</body>
+</html>

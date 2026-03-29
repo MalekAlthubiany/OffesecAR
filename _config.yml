@@ -1,0 +1,35 @@
+title: "OffsecAR"
+description: "أخبار Offensive Security يومياً بالعربي · OffsecAR"
+url: "https://malekalthubiany.github.io"
+baseurl: "/OffsecAR"
+lang: ar
+direction: rtl
+
+author:
+  name: "OffsecAR"
+  twitter: "@malekvapt"
+
+permalink: /:year/:month/:day/:title/
+
+collections:
+  blogs:
+    output: true
+    permalink: /blogs/:name/
+
+defaults:
+  - scope:
+      path: ""
+      type: "blogs"
+    values:
+      layout: "blog"
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+markdown: kramdown
+highlighter: rouge
+
+feed:
+  path: feed.xml
