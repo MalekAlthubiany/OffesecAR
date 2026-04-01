@@ -1,109 +1,120 @@
 ---
 layout: blog
-title: "Frida: أداة التحليل الديناميكي التي تعيد تعريف فحص التطبيقات في بيئات الـ Runtime"
-date: 2026-04-01T04:48:06Z
+title: "Frida: أداة التحليل الديناميكي لاختراق واختبار التطبيقات على أنظمة التشغيل المختلفة"
+date: 2026-04-01T06:26:41Z
 category: "أداة"
-excerpt: "في عالم Offensive Security، التحليل الثابت وحده لا يكفي. Frida تمنحك القدرة على التلاعب بسلوك التطبيقات أثناء التشغيل، استخراج البيانات الحساسة، وتجاوز آليات الحماية دون الحاجة لإعادة ترجمة الكود. هذه الأداة أصبحت معياراً أساسياً لكل من يعمل في فحص الثغرات واختبار الاختراق."
-read_time: 7
+excerpt: "Frida تمثل نقلة نوعية في مجال Dynamic Instrumentation، حيث تتيح لك التحكم الكامل بسلوك التطبيقات أثناء التشغيل. سواء كنت تختبر أمان تطبيق Android أو تحلل Binary على Windows، فإن Frida تمنحك القدرة على Hook الدوال وتعديل السلوك دون إعادة الترجمة. هذه المقالة تستعرض كيفية استخدام Frida عملياً في سيناريوهات Offensive Security الحقيقية."
+read_time: 8
 tags: ["Frida", "Dynamic Analysis", "Mobile Security", "Reverse Engineering", "Penetration Testing"]
 slug: "frida-dynamic-analysis"
 image: "/OffsecAR/assets/images/blogs/frida-dynamic-analysis.png"
 ---
 
-## لماذا Frida؟
+## ما هي Frida ولماذا تهم المختبر الأمني؟
 
-عندما تواجه تطبيقاً محمياً بآليات Anti-Debugging أو Root Detection، أو تحتاج لفهم سلوك Function معينة دون الغوص في الـ Assembly، تصبح Frida خيارك الأمثل. هذه الأداة مبنية على مبدأ Dynamic Instrumentation، حيث تسمح لك بحقن JavaScript Code داخل Process قيد التشغيل.
+Frida هي إطار عمل مفتوح المصدر لـ Dynamic Instrumentation، تسمح لك بحقن JavaScript في عمليات تعمل على iOS وAndroid وWindows وmacOS وLinux. القوة الحقيقية لـ Frida تكمن في قدرتها على تعديل سلوك التطبيقات في الوقت الفعلي دون الحاجة للشيفرة المصدرية أو إعادة التصنيف.
 
-القوة الحقيقية لـ Frida تكمن في مرونتها. تعمل على Android وiOS وWindows وLinux وmacOS، وتدعم لغات برمجة متعددة. يمكنك استخدامها لـ:
+على عكس أدوات Static Analysis، تتيح لك Frida رؤية ما يحدث فعلياً أثناء التنفيذ. يمكنك اعتراض المكالمات الدالية، تعديل القيم المُرجعة، استخراج البيانات من الذاكرة، وحتى تجاوز آليات الحماية مثل SSL Pinning وRoot Detection.
 
-- تتبع Function Calls وتعديل Return Values
-- استخراج Encryption Keys من الذاكرة
-- تجاوز SSL Pinning وفحص Network Traffic
-- تعديل سلوك التطبيق في الوقت الفعلي
+## بنية Frida وآلية العمل
 
-## البنية التقنية
+تتكون Frida من مكونين رئيسيين:
 
-Frida تتكون من مكونين أساسيين: الـ Server الذي يعمل على الجهاز المستهدف، والـ Client الذي تكتب من خلاله Scripts بلغة JavaScript أو Python. الـ Server يستخدم تقنية Code Injection لحقن Frida Agent داخل الـ Process، بينما الـ Client يتواصل معه عبر بروتوكول خاص.
+**Frida Server**: يعمل على الجهاز المستهدف (الهاتف، الجهاز الافتراضي، أو النظام المستهدف) ويكون مسؤولاً عن حقن الكود في العمليات.
 
-الاتصال يتم عبر USB أو Network، مما يعطيك مرونة في سيناريوهات العمل المختلفة. الأداة تستخدم V8 JavaScript Engine، نفس المحرك المستخدم في Chrome، مما يضمن أداءً عالياً.
+**Frida Client**: يعمل على جهازك ويتواصل مع Server عبر TCP. يمكنك استخدام Python API أو Command-line tools مثل `frida` و`frida-trace`.
 
-## السيناريوهات العملية
+عندما تستهدف عملية معينة، يقوم Frida بحقن مكتبة ديناميكية (Gadget) في مساحة عنوان العملية. بعدها، يمكنك تنفيذ JavaScript code يتفاعل مع Runtime الخاص بالتطبيق، سواء كان Dalvik/ART على Android أو Native code على منصات أخرى.
 
-### تجاوز Root Detection
+## سيناريو عملي: تجاوز Root Detection
 
-أغلب التطبيقات المصرفية تفحص وجود Root على الجهاز. مع Frida، يمكنك Hook الـ Function المسؤولة وإرجاع قيمة False:
+لنأخذ مثالاً واقعياً: تطبيق بنكي يكتشف Root ويرفض العمل. نريد تحديد الدالة المسؤولة وتعديل سلوكها.
+
+أولاً، نبحث عن الدوال المشبوهة:
+
+```bash
+frida-trace -U -f com.bank.app -i '*root*' -i '*Root*'
+```
+
+هذا الأمر يبدأ التطبيق ويعترض أي دالة تحتوي على كلمة "root". بعد تحديد الدالة المستهدفة، نكتب Script بسيط:
 
 ```javascript
 Java.perform(function() {
-    var RootDetection = Java.use("com.example.app.SecurityCheck");
+    var RootDetection = Java.use('com.bank.security.RootDetection');
     
     RootDetection.isRooted.implementation = function() {
-        console.log("[+] Root check bypassed");
-        return false;
+        console.log('[+] isRooted() called - Bypassing!');
+        return false; // دائماً نرجع false
     };
+    
+    console.log('[*] Root detection bypassed successfully');
 });
 ```
 
-### استخراج Encryption Keys
+نحفظ Script في ملف `bypass.js` ونشغله:
 
-لنفترض أن التطبيق يستخدم AES للتشفير. يمكنك اعتراض الـ Key عند إنشاء Cipher Object:
+```bash
+frida -U -f com.bank.app -l bypass.js --no-pause
+```
+
+الآن التطبيق يعتقد أن الجهاز غير مكسور الصلاحيات.
+
+## تقنيات متقدمة: Hooking Native Functions
+
+التطبيقات الحديثة تستخدم Native libraries (C/C++) لتنفيذ العمليات الحساسة. Frida تتيح لك Hook هذه الدوال أيضاً:
 
 ```javascript
-Java.perform(function() {
-    var SecretKeySpec = Java.use("javax.crypto.spec.SecretKeySpec");
-    
-    SecretKeySpec.$init.overload('[B', 'java.lang.String').implementation = function(key, algorithm) {
-        console.log("[+] AES Key: " + bytesToHex(key));
-        return this.$init(key, algorithm);
-    };
-    
-    function bytesToHex(bytes) {
-        var hex = [];
-        for(var i = 0; i < bytes.length; i++) {
-            hex.push(("0" + (bytes[i] & 0xFF).toString(16)).slice(-2));
-        }
-        return hex.join("");
+Interceptor.attach(Module.findExportByName('libnative.so', 'validateLicense'), {
+    onEnter: function(args) {
+        console.log('[+] validateLicense called');
+        console.log('[+] License key: ' + Memory.readUtf8String(args[0]));
+    },
+    onLeave: function(retval) {
+        console.log('[+] Original return value: ' + retval);
+        retval.replace(1); // نغير القيمة لـ 1 (valid)
+        console.log('[+] Modified to: ' + retval);
     }
 });
 ```
 
-### تتبع Network Requests
+هذا Script يعترض دالة `validateLicense` في مكتبة Native، يعرض المفتاح المُمرر لها، ثم يعدل القيمة المُرجعة لتكون دائماً صحيحة.
 
-لفهم كيف يتواصل التطبيق مع الـ Backend:
+## استخراج البيانات من الذاكرة
+
+أحد أقوى استخدامات Frida هو استخراج البيانات الحساسة من الذاكرة. مثلاً، لاستخراج مفاتيح التشفير:
 
 ```javascript
 Java.perform(function() {
-    var URL = Java.use("java.net.URL");
+    var SecretKeySpec = Java.use('javax.crypto.spec.SecretKeySpec');
     
-    URL.openConnection.overload().implementation = function() {
-        var connection = this.openConnection();
-        console.log("[+] Request to: " + this.toString());
-        return connection;
+    SecretKeySpec.$init.overload('[B', 'java.lang.String').implementation = function(key, algorithm) {
+        console.log('[+] Encryption key detected!');
+        console.log('[+] Algorithm: ' + algorithm);
+        console.log('[+] Key (hex): ' + bytesToHex(key));
+        
+        return this.$init(key, algorithm);
     };
 });
+
+function bytesToHex(bytes) {
+    var hex = '';
+    for(var i = 0; i < bytes.length; i++) {
+        hex += ('0' + (bytes[i] & 0xFF).toString(16)).slice(-2);
+    }
+    return hex;
+}
 ```
 
-## التكامل مع Workflow الاختبار
+## نصائح عملية للاستخدام الاحترافي
 
-Frida ليست أداة منعزلة. يمكن دمجها مع Burp Suite لفحص الـ Traffic، أو مع Objection (أداة مبنية على Frida) للحصول على Shell تفاعلي داخل التطبيق.
+**استخدم Frida-Server المناسب**: تأكد من تطابق إصدار Server مع Client وarchitecture الجهاز المستهدف (arm64، x86، إلخ).
 
-للاستخدام الاحترافي، أنصح بكتابة Scripts قابلة لإعادة الاستخدام وتنظيمها في Repository. استخدم TypeScript بدلاً من JavaScript للحصول على Type Safety، خاصة في المشاريع الكبيرة.
+**تعامل مع Anti-Frida**: بعض التطبيقات تكتشف وجود Frida عبر فحص Ports أو أسماء Processes. استخدم تقنيات مثل إعادة تسمية Server أو استخدام Frida Gadget المدمج.
 
-```bash
-# تثبيت Frida وأدواته
-pip install frida-tools
-npm install -g @frida/cli
+**استفد من Frida Codeshare**: مجتمع Frida يوفر Scripts جاهزة لسيناريوهات شائعة على https://codeshare.frida.re - لا حاجة لإعادة اختراع العجلة.
 
-# تشغيل Script على تطبيق معين
-frida -U -f com.example.app -l script.js --no-pause
-```
+**دمج Frida مع Burp Suite**: يمكنك استخدام Frida لتجاوز SSL Pinning ثم تحليل Traffic عبر Burp، وهو Workflow قياسي في Mobile Pentesting.
 
-## الحدود والتحديات
+**احترس من Detection**: التطبيقات الحساسة تستخدم آليات معقدة للكشف عن Instrumentation. فهم كيفية عمل هذه الآليات أساسي لتجاوزها بنجاح.
 
-رغم قوتها، Frida لها حدود. أولاً، العديد من التطبيقات الحديثة تحتوي على Anti-Frida Checks تكتشف وجودها. ثانياً، الـ Obfuscation القوي يجعل إيجاد الـ Functions المستهدفة أصعب. ثالثاً، بعض الـ Native Code المعقد يحتاج لفهم عميق بالـ ARM Assembly.
-
-الحل يكمن في استخدام تقنيات متقدمة مثل Frida Stalker لـ Code Tracing، أو الدمج مع أدوات Reverse Engineering أخرى مثل Ghidra. أيضاً، تعلم كيفية Patch الـ Anti-Frida Checks نفسها يصبح ضرورياً.
-
-## الخلاصة
-
-Frida غيّرت قواعد اللعبة في مجال Dynamic Analysis. من تجاوز الحمايات إلى استخراج البيانات الحساسة، الأداة توفر إمكانيات لا حدود لها. لكن القوة الحقيقية تأتي من فهم البنية الداخلية للتطبيقات والقدرة على كتابة Scripts فعّالة. استثمر الوقت في تعلم JavaScript وفهم Android/iOS Internals، وستجد Frida سلاحاً لا يُستهان به في ترسانتك الأمنية.
+Frida ليست مجرد أداة، بل منصة كاملة تفتح آفاقاً واسعة في Reverse Engineering وPentesting. إتقانها يتطلب فهماً عميقاً لـ Application Runtime وMemory Management، لكن العائد يستحق الاستثمار.

