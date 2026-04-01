@@ -16,11 +16,6 @@ import re
 
 # ─── إعدادات ───────────────────────────────────────────────────────────────
 ANTHROPIC_API_KEY  = os.environ["ANTHROPIC_API_KEY"]
-TWITTER_API_KEY    = os.environ["TWITTER_API_KEY"]
-TWITTER_API_SECRET = os.environ["TWITTER_API_SECRET"]
-TWITTER_ACCESS_TOKEN        = os.environ["TWITTER_ACCESS_TOKEN"]
-TWITTER_ACCESS_TOKEN_SECRET = os.environ["TWITTER_ACCESS_TOKEN_SECRET"]
-TWITTER_HANDLE     = os.environ.get("TWITTER_HANDLE", "@SecAr_Daily")
 
 POSTS_DIR  = Path("_posts")
 IMAGES_DIR = Path("assets/images")
@@ -223,7 +218,7 @@ def create_post_image(content: dict) -> Path:
     draw.rectangle([54, H - 96, W - 54, H - 94], fill=C_BORDER)
 
     # ── اسم الحساب ────────────────────────────────────────────────────
-    draw.text((60, H - 72), TWITTER_HANDLE, font=font_handle, fill=C_MUTED)
+    draw.text((60, H - 72), "@OffsecARE", font=font_handle, fill=C_MUTED)
     draw.text((W - 60, H - 72), "offsec-ar.github.io", font=font_handle, fill=C_MUTED, anchor="ra")
 
     # ── حفظ ───────────────────────────────────────────────────────────
@@ -234,38 +229,6 @@ def create_post_image(content: dict) -> Path:
     return out_path
 
 
-# ─── 4. النشر على تويتر ────────────────────────────────────────────────────
-def post_to_twitter(content: dict, image_path: Path) -> str:
-    """
-    ينشر التغريدة باستخدام v2 API فقط (متوافق مع Free Plan).
-    الـ Free Plan لا يدعم رفع الميديا (يحتاج Basic)،
-    لذا ننشر النص + رابط الموقع، والصورة تُحفظ للموقع فقط.
-    """
-    client_v2 = tweepy.Client(
-        consumer_key=TWITTER_API_KEY,
-        consumer_secret=TWITTER_API_SECRET,
-        access_token=TWITTER_ACCESS_TOKEN,
-        access_token_secret=TWITTER_ACCESS_TOKEN_SECRET,
-    )
-
-    tweet_text = content.get("tweet_text", content.get("headline", ""))
-
-    # أضف رابط الموقع عشان يشوفون الصورة الكاملة هناك
-    date_str = datetime.now(timezone.utc).strftime("%Y/%m/%d")
-    site_url = f"https://offsec-ar.github.io/{date_str}/offensec"
-    full_text = f"{tweet_text}\n\n🔗 {site_url}"
-
-    # اقتطع لـ 280 حرف إن طال النص
-    if len(full_text) > 280:
-        max_text = 280 - len(f"\n\n🔗 {site_url}") - 3
-        tweet_text = tweet_text[:max_text] + "..."
-        full_text = f"{tweet_text}\n\n🔗 {site_url}"
-
-    resp = client_v2.create_tweet(text=full_text)
-    tweet_id = resp.data["id"]
-    tweet_url = f"https://twitter.com/{TWITTER_HANDLE.lstrip('@')}/status/{tweet_id}"
-    print(f"✅ تويتر: {tweet_url}")
-    return tweet_url
 
 
 # ─── 5. إنشاء منشور Jekyll ─────────────────────────────────────────────────
