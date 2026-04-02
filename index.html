@@ -6,259 +6,200 @@ layout: none
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OffsecAR</title>
-<meta name="description" content="أخبار Offensive Security يومياً بالعربي · OffsecAR">
-<meta property="og:title" content="OffsecAR">
-<meta property="og:image" content="/assets/images/og.png">
+<title>OffsecAR · الأمن الهجومي بالعربي</title>
+<meta name="description" content="مجتمع عربي متخصص في Offensive Security — أخبار ومقالات يومية بالعربي">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Sans+Arabic:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:       #0c0c0c;
-  --bg2:      #141414;
-  --bg3:      #1c1c1c;
-  --red:      #e03c2a;
-  --red-dim:  rgba(224,60,42,0.15);
-  --white:    #f0ede8;
-  --muted:    #6b6b6b;
-  --border:   rgba(255,255,255,0.07);
-  --serif:    'Noto Naskh Arabic', serif;
-  --sans:     'Noto Sans Arabic', sans-serif;
-  --mono:     'IBM Plex Mono', monospace;
-}
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  color: var(--white);
-  font-family: var(--sans);
-  font-size: 16px;
-  line-height: 1.7;
-  -webkit-font-smoothing: antialiased;
+:root {
+  --bg: #0c0c0c;
+  --bg2: #141414;
+  --bg3: #1c1c1c;
+  --red: #e03c2a;
+  --white: #f0ede8;
+  --muted: #6b6b6b;
+  --border: rgba(255,255,255,0.07);
+  --serif: 'Noto Naskh Arabic', serif;
+  --sans: 'Noto Sans Arabic', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
 }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--white); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
 a { color: inherit; text-decoration: none; }
 
-/* ── شريط التنقل ── */
+/* ── NAV ── */
 nav {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(12,12,12,0.92);
+  background: rgba(12,12,12,0.94);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  padding: 0 5%;
+  padding: 0 6%;
   display: flex; align-items: center; justify-content: space-between;
-  height: 60px;
+  height: 58px;
 }
-.nav-logo {
-  font-family: var(--sans);
-  font-weight: 900;
-  font-size: 18px;
-  letter-spacing: -0.02em;
-  color: var(--white);
-  display: flex; align-items: center; gap: 10px;
-}
-.nav-logo span {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--red);
-  display: inline-block;
-  box-shadow: 0 0 10px var(--red);
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-.nav-links {
-  display: flex; gap: 28px;
-  font-size: 13px; font-weight: 400; color: var(--muted);
-}
+.nav-logo { font-weight: 900; font-size: 17px; display: flex; align-items: center; gap: 9px; }
+.nav-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); animation: blink 2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.nav-links { display: flex; gap: 24px; font-size: 13px; color: var(--muted); }
 .nav-links a:hover { color: var(--white); transition: color .2s; }
 .nav-links a.active { color: var(--red); }
 
-/* ── هيرو ── */
+/* ── HERO / INTRO ── */
 .hero {
-  padding: 80px 5% 64px;
+  padding: 72px 6% 64px;
   border-bottom: 1px solid var(--border);
-  position: relative; overflow: hidden;
-}
-.hero::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: radial-gradient(ellipse 60% 70% at 90% 50%, rgba(224,60,42,0.06) 0%, transparent 70%);
-  pointer-events: none;
-}
-.hero-eyebrow {
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 20px;
-}
-.hero-tag {
-  font-size: 10px; font-weight: 600;
-  color: var(--red);
-  border: 1px solid rgba(224,60,42,0.4);
-  border-radius: 4px;
-  padding: 3px 9px;
-  letter-spacing: 0.08em;
-  direction: ltr;
-}
-.hero-date { font-size: 12px; color: var(--muted); direction: ltr; font-family: var(--mono); }
-.hero-title {
-  font-family: var(--serif);
-  font-size: clamp(28px, 4vw, 52px);
-  font-weight: 700;
-  line-height: 1.45;
-  letter-spacing: -0.01em;
-  max-width: 760px;
-  margin-bottom: 20px;
-}
-.hero-title em { font-style: normal; color: var(--red); }
-.hero-excerpt {
-  font-size: 17px; font-weight: 300; color: rgba(240,237,232,0.6);
-  max-width: 600px; line-height: 1.85;
-  margin-bottom: 28px;
-}
-.hero-meta {
-  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-}
-.severity-badge {
-  display: flex; align-items: center; gap: 7px;
-  font-size: 12px; font-weight: 500;
-  padding: 5px 12px;
-  border-radius: 6px;
-  direction: ltr;
-}
-.sev-critical { background: rgba(224,60,42,0.12); color: #e03c2a; border: 1px solid rgba(224,60,42,0.25); }
-.sev-high     { background: rgba(232,136,78,0.12); color: #e8884e; border: 1px solid rgba(232,136,78,0.25); }
-.sev-medium   { background: rgba(232,196,78,0.12); color: #c8a430; border: 1px solid rgba(232,196,78,0.25); }
-.severity-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-.read-more {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 13px; color: var(--muted);
-  border: 1px solid var(--border);
-  border-radius: 6px; padding: 5px 14px;
-  transition: all .2s;
-}
-.read-more:hover { color: var(--white); border-color: rgba(255,255,255,0.2); }
-.hero-image {
-  margin-top: 36px;
-  max-width: 520px;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-.hero-image img { width: 100%; display: block; }
-
-/* ── المنشورات ── */
-.main-layout {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 0;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 5%;
 }
-@media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } }
-
-.posts-section { border-left: 1px solid var(--border); padding: 48px 48px 48px 0; }
-.sidebar { padding: 48px 0 48px 40px; }
-
-.section-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 32px;
+.hero-label {
+  font-size: 10px; font-weight: 600; color: var(--red);
+  letter-spacing: .12em; text-transform: uppercase;
+  margin-bottom: 20px; direction: ltr;
 }
-.section-title {
-  font-size: 11px; font-weight: 600;
-  color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
+.hero-title {
+  font-family: var(--serif);
+  font-size: clamp(32px, 4.5vw, 58px);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -.01em;
+  margin-bottom: 24px;
+  max-width: 700px;
+}
+.hero-title em { font-style: normal; color: var(--red); }
+.hero-body {
+  font-size: 17px; font-weight: 300;
+  color: rgba(240,237,232,.65);
+  line-height: 1.9;
+  max-width: 600px;
+  margin-bottom: 36px;
+}
+.hero-divider { width: 48px; height: 3px; background: var(--red); border-radius: 2px; margin-bottom: 32px; }
+
+/* روابط التواصل */
+.community-links { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 48px; }
+.comm-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  transition: all .2s;
   direction: ltr;
 }
+.comm-link:hover { color: var(--white); border-color: rgba(255,255,255,.2); transform: translateY(-1px); }
+.comm-link.tg  { border-color: rgba(41,182,246,.2);  color: #29b6f6; }
+.comm-link.tg:hover  { background: rgba(41,182,246,.07); border-color: rgba(41,182,246,.4); }
+.comm-link.wa  { border-color: rgba(37,211,102,.2);  color: #25d366; }
+.comm-link.wa:hover  { background: rgba(37,211,102,.07); border-color: rgba(37,211,102,.4); }
+.comm-link.tw  { border-color: rgba(255,255,255,.1); color: var(--muted); }
+.comm-link.tw:hover  { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.2); color: var(--white); }
+.comm-icon { font-size: 15px; }
+
+/* آخر خبر */
+.latest-label {
+  font-size: 10px; font-weight: 600; color: var(--muted);
+  letter-spacing: .1em; text-transform: uppercase;
+  margin-bottom: 16px; direction: ltr;
+}
+.latest-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 28px;
+  background: var(--bg2);
+  max-width: 680px;
+  cursor: pointer;
+  transition: border-color .2s;
+}
+.latest-card:hover { border-color: rgba(255,255,255,.15); }
+.latest-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.latest-tag { font-size: 10px; font-weight: 600; color: var(--red); border: 1px solid rgba(224,60,42,.35); border-radius: 3px; padding: 2px 8px; letter-spacing: .06em; }
+.latest-date { font-size: 11px; color: var(--muted); font-family: var(--mono); direction: ltr; }
+.latest-title { font-family: var(--serif); font-size: 20px; font-weight: 600; line-height: 1.55; margin-bottom: 10px; }
+.latest-excerpt { font-size: 13px; color: rgba(240,237,232,.5); line-height: 1.75; }
+.latest-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; flex-wrap: wrap; gap: 8px; }
+.sev-badge { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 4px; direction: ltr; }
+.sev-critical { background: rgba(224,60,42,.1); color: #e03c2a; border: 1px solid rgba(224,60,42,.2); }
+.sev-high     { background: rgba(232,136,78,.1); color: #e8884e; border: 1px solid rgba(232,136,78,.2); }
+.sev-medium   { background: rgba(232,196,78,.1); color: #c8a430; border: 1px solid rgba(232,196,78,.2); }
+.sev-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.read-more-link { font-size: 12px; color: var(--muted); }
+.read-more-link:hover { color: var(--red); }
+
+/* ── GRID ── */
+.page-body {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 0;
+  padding: 0 6%;
+}
+@media(max-width:860px) { .page-body { grid-template-columns: 1fr; } }
+
+.posts-col { border-left: 1px solid var(--border); padding: 48px 0 64px 48px; }
+.sidebar-col { padding: 48px 0 64px 0; }
+
+.section-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 28px;
+}
+.section-title-sm { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; direction: ltr; }
 .section-link { font-size: 12px; color: var(--muted); }
 .section-link:hover { color: var(--red); }
 
 /* بطاقة المنشور */
-.post-card {
-  display: grid; grid-template-columns: 48px 1fr auto;
-  align-items: start; gap: 16px;
-  padding: 20px 0;
+.post-item {
+  display: grid; grid-template-columns: 44px 1fr auto;
+  gap: 14px; align-items: start;
+  padding: 18px 0;
   border-bottom: 1px solid var(--border);
-  transition: background .15s;
   cursor: pointer;
 }
-.post-card:last-child { border-bottom: none; }
-.post-card:hover .post-title { color: var(--red); }
-.post-index {
-  font-family: var(--mono); font-size: 12px;
-  color: var(--muted); padding-top: 3px;
-  direction: ltr;
-}
-.post-title {
-  font-family: var(--serif); font-size: 17px; font-weight: 600;
-  line-height: 1.5; margin-bottom: 5px;
-  transition: color .2s;
-}
-.post-meta { font-size: 12px; color: var(--muted); direction: ltr; font-family: var(--mono); }
-.post-badge {
-  font-size: 10px; font-weight: 600;
-  padding: 2px 7px; border-radius: 4px;
-  white-space: nowrap;
-}
+.post-item:last-child { border-bottom: none; }
+.post-item:hover .post-item-title { color: var(--red); }
+.post-num { font-family: var(--mono); font-size: 11px; color: var(--muted); padding-top: 2px; direction: ltr; }
+.post-item-title { font-family: var(--serif); font-size: 16px; font-weight: 600; line-height: 1.5; margin-bottom: 4px; transition: color .2s; }
+.post-item-meta { font-size: 11px; color: var(--muted); direction: ltr; font-family: var(--mono); }
+.post-badge { font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 3px; white-space: nowrap; }
 
 /* سايدبار */
-.sidebar-widget { margin-bottom: 40px; }
-.widget-title {
-  font-size: 10px; font-weight: 600; color: var(--muted);
-  letter-spacing: 0.1em; text-transform: uppercase;
-  margin-bottom: 16px; direction: ltr;
-}
-.stat-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 0; border-bottom: 1px solid var(--border);
-  font-size: 13px;
-}
-.stat-row:last-child { border-bottom: none; }
+.widget { margin-bottom: 36px; }
+.widget-title { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 14px; direction: ltr; }
+.stat-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.stat-item:last-child { border-bottom: none; }
 .stat-label { color: var(--muted); }
-.stat-value { font-family: var(--mono); color: var(--white); font-size: 12px; }
+.stat-value { font-family: var(--mono); font-size: 12px; }
 .stat-value.red { color: var(--red); }
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag-item { font-size: 11px; color: var(--muted); border: 1px solid var(--border); border-radius: 4px; padding: 3px 8px; transition: all .2s; cursor: pointer; }
+.tag-item:hover { color: var(--white); border-color: rgba(255,255,255,.2); }
 
-.tag-cloud { display: flex; flex-wrap: wrap; gap: 7px; }
-.tag-pill {
-  font-size: 11px; color: var(--muted);
-  border: 1px solid var(--border);
-  border-radius: 4px; padding: 3px 9px;
-  transition: all .2s; cursor: pointer;
-}
-.tag-pill:hover { color: var(--white); border-color: rgba(255,255,255,0.2); }
-
-/* فوتر */
+/* ── FOOTER ── */
 footer {
   border-top: 1px solid var(--border);
-  padding: 28px 5%;
+  padding: 24px 6%;
   display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
   font-size: 12px; color: var(--muted);
 }
-.footer-logo { font-weight: 700; color: var(--white); }
+.footer-logo { font-weight: 900; font-size: 15px; color: var(--white); }
+.footer-made { display: flex; align-items: center; gap: 6px; }
 
-/* قسم التعريف */
-.about-section{padding:40px 5%;border-bottom:1px solid var(--border-tertiary);background:rgba(255,255,255,0.01);}
-.about-inner{max-width:800px;margin:0 auto;}
-.about-tag{font-size:10px;font-weight:500;color:var(--red);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;direction:ltr;}
-.about-text{font-family:var(--serif);font-size:18px;line-height:1.9;color:rgba(240,237,232,.75);margin-bottom:24px;}
-.about-stats{display:flex;gap:32px;flex-wrap:wrap;}
-.about-stat{display:flex;flex-direction:column;align-items:center;gap:4px;}
-.stat-num{font-size:28px;font-weight:700;color:var(--white);font-family:var(--mono);}
-.stat-lbl{font-size:12px;color:var(--muted);}
-.footer-made{font-size:13px;color:var(--muted);}
-
-/* أنيميشن دخول */
-.fade-in { animation: fadeUp .5s ease both; }
-@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
-.delay-1 { animation-delay: .08s; }
-.delay-2 { animation-delay: .16s; }
-.delay-3 { animation-delay: .24s; }
+/* أنيميشن */
+.fade-up { animation: fadeUp .5s ease both; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+.d1{animation-delay:.05s} .d2{animation-delay:.1s} .d3{animation-delay:.15s}
 </style>
 </head>
 <body>
 
-<!-- التنقل -->
 <nav>
-  <div class="nav-logo">
-    <span></span>
+  <a href="/OffsecAR/" class="nav-logo">
+    <span class="nav-dot"></span>
     OffsecAR
-  </div>
+  </a>
   <div class="nav-links">
     <a href="/OffsecAR/" class="active">الرئيسية</a>
     <a href="/OffsecAR/blogs">Blogs</a>
@@ -267,80 +208,78 @@ footer {
   </div>
 </nav>
 
-<!-- قسم التعريف -->
-<section class="about-section fade-in">
-  <div class="about-inner">
-    <div class="about-tag">عن OffsecAR</div>
-    <p class="about-text">
-      مجتمع عربي متخصص في الأمن الهجومي — ننشر يومياً أبرز الثغرات والتقنيات والأدوات التي يحتاجها كل مختص في Red Team وPenetration Testing. هدفنا تعزيز المحتوى العربي التقني العميق في مجال Offensive Security، وجعل المعرفة متاحة لكل عربي في هذا المجال.
-    </p>
-    <div class="about-stats">
-      <div class="about-stat">
-        <span class="stat-num">{{ site.posts | size }}</span>
-        <span class="stat-lbl">خبر</span>
+<!-- HERO -->
+<div style="border-bottom:1px solid var(--border)">
+<section class="hero fade-up">
+  <div class="hero-label">OFFENSIVE SECURITY · مجتمع عربي</div>
+  <h1 class="hero-title">
+    الأمن الهجومي<br>
+    <em>بالعربي</em>
+  </h1>
+  <p class="hero-body">
+    نحن مجتمع عربي متخصص في Offensive Security — نجمع المختصين والمهتمين في هذا المجال ونقدم يومياً أبرز الثغرات والتقنيات والأدوات. هدفنا تعزيز المحتوى العربي التقني العميق، ودعم الشركات السعودية في هذا القطاع.
+  </p>
+  <div class="hero-divider"></div>
+
+  <!-- روابط التواصل -->
+  <div class="community-links fade-up d1">
+    <a href="https://t.me/OffsecAR" class="comm-link tg" target="_blank">
+      <span class="comm-icon">✈</span> Telegram
+    </a>
+    <a href="https://wa.me/OffsecAR" class="comm-link wa" target="_blank">
+      <span class="comm-icon">●</span> WhatsApp
+    </a>
+    <a href="https://twitter.com/OffsecARE" class="comm-link tw" target="_blank">
+      <span class="comm-icon">𝕏</span> Twitter / X
+    </a>
+  </div>
+
+  <!-- آخر خبر -->
+  {% assign latest = site.posts.first %}
+  {% if latest %}
+  <div class="fade-up d2">
+    <div class="latest-label">آخر خبر</div>
+    <div class="latest-card" onclick="location.href='{{ latest.url | prepend: site.baseurl }}'">
+      <div class="latest-eyebrow">
+        <span class="latest-tag">{{ latest.category | upcase }}</span>
+        <span class="latest-date">{{ latest.date | date: "%d %b %Y" }}</span>
+        {% if latest.cve and latest.cve != "" %}
+        <span class="latest-date" style="color:var(--red)">{{ latest.cve }}</span>
+        {% endif %}
       </div>
-      <div class="about-stat">
-        <span class="stat-num">{{ site.blogs | size }}</span>
-        <span class="stat-lbl">مقالة</span>
-      </div>
-      <div class="about-stat">
-        <span class="stat-num">يومي</span>
-        <span class="stat-lbl">تحديث</span>
+      <div class="latest-title">{{ latest.title }}</div>
+      <div class="latest-excerpt">{{ latest.excerpt | strip_html | truncatewords: 28 }}</div>
+      <div class="latest-footer">
+        {% if latest.severity %}
+        <span class="sev-badge sev-{{ latest.severity_en }}">
+          <span class="sev-dot"></span>
+          خطورة {{ latest.severity }}{% if latest.cvss and latest.cvss != "" %} · CVSS {{ latest.cvss }}{% endif %}
+        </span>
+        {% endif %}
+        <span class="read-more-link">اقرأ التحليل ←</span>
       </div>
     </div>
   </div>
-</section>
-
-<!-- هيرو: آخر منشور -->
-{% assign latest = site.posts.first %}
-{% if latest %}
-<section class="hero fade-in">
-  <div class="hero-eyebrow">
-    <span class="hero-tag">{{ latest.category | upcase }}</span>
-    <span class="hero-date">{{ latest.date | date: "%d %b %Y" }}</span>
-    {% if latest.cve and latest.cve != "" %}
-    <span class="hero-date" style="color:var(--red)">{{ latest.cve }}</span>
-    {% endif %}
-  </div>
-  <h1 class="hero-title">{{ latest.title }}</h1>
-  <p class="hero-excerpt">{{ latest.excerpt | strip_html | truncatewords: 35 }}</p>
-  <div class="hero-meta">
-    {% if latest.severity %}
-    <span class="severity-badge sev-{{ latest.severity_en }}">
-      <span class="dot"></span>
-      خطورة {{ latest.severity }}
-      {% if latest.cvss and latest.cvss != "" %} · CVSS {{ latest.cvss }}{% endif %}
-    </span>
-    {% endif %}
-    <a href="{{ latest.url }}" class="read-more">اقرأ التحليل ←</a>
-    {% if latest.tweet_url and latest.tweet_url != "" %}
-    <a href="{{ latest.tweet_url }}" class="read-more" target="_blank" dir="ltr">Twitter ↗</a>
-    {% endif %}
-  </div>
-  {% if latest.image %}
-  <div class="hero-image">
-    <img src="{{ latest.image }}" alt="{{ latest.title }}" loading="lazy">
-  </div>
   {% endif %}
 </section>
-{% endif %}
+</div>
 
-<!-- المحتوى الرئيسي -->
-<div class="main-layout">
+<!-- BODY -->
+<div class="page-body">
 
-  <!-- المنشورات -->
-  <main class="posts-section">
-    <div class="section-header">
-      <span class="section-title">LATEST POSTS</span>
+  <!-- منشورات -->
+  <main class="posts-col fade-up d3">
+    <div class="section-hdr">
+      <span class="section-title-sm">LATEST POSTS</span>
       <a href="/OffsecAR/blogs" class="section-link">Blogs ←</a>
     </div>
 
     {% for post in site.posts limit:10 offset:1 %}
-    <article class="post-card fade-in" onclick="location.href='{{ post.url | prepend: site.baseurl }}'">
-      <div class="post-index">{{ forloop.index | prepend: "0" | slice: -2, 2 }}</div>
+    <article class="post-item" onclick="location.href='{{ post.url | prepend: site.baseurl }}'">
+      <div class="post-num">{{ forloop.index | prepend: "0" | slice: -2, 2 }}</div>
       <div>
-        <div class="post-title">{{ post.title }}</div>
-        <div class="post-meta">{{ post.date | date: "%d %b %Y" }} · {{ post.category }}</div>
+        <div class="post-item-title">{{ post.title }}</div>
+        <div class="post-item-meta">{{ post.date | date: "%d %b %Y" }} · {{ post.category }}</div>
       </div>
       {% if post.severity %}
       <span class="post-badge sev-{{ post.severity_en }}">{{ post.severity }}</span>
@@ -350,51 +289,57 @@ footer {
   </main>
 
   <!-- سايدبار -->
-  <aside class="sidebar">
-    <div class="sidebar-widget">
+  <aside class="sidebar-col" style="padding-right:40px">
+
+    <div class="widget">
       <div class="widget-title">STATS</div>
-      <div class="stat-row">
-        <span class="stat-label">إجمالي المنشورات</span>
+      <div class="stat-item">
+        <span class="stat-label">إجمالي الأخبار</span>
         <span class="stat-value">{{ site.posts | size }}</span>
       </div>
-      <div class="stat-row">
-        <span class="stat-label">منشورات هذا الشهر</span>
-        <span class="stat-value red">
-          {{ site.posts.size }}
-        </span>
+      <div class="stat-item">
+        <span class="stat-label">إجمالي المقالات</span>
+        <span class="stat-value">{{ site.blogs | size }}</span>
       </div>
-      <div class="stat-row">
+      <div class="stat-item">
         <span class="stat-label">ثغرات حرجة</span>
-        <span class="stat-value red">
-          {{ site.posts | where: "severity", "حرجة" | size }}
-        </span>
+        <span class="stat-value red">{{ site.posts | where: "severity", "حرجة" | size }}</span>
       </div>
-      <div class="stat-row">
+      <div class="stat-item">
         <span class="stat-label">آخر تحديث</span>
         <span class="stat-value">{{ site.time | date: "%d %b" }}</span>
       </div>
     </div>
 
-    <div class="sidebar-widget">
+    <div class="widget">
       <div class="widget-title">TOPICS</div>
       <div class="tag-cloud">
-        <span class="tag-pill">ثغرات حرجة</span>
-        <span class="tag-pill">Red Team</span>
-        <span class="tag-pill">Exploit Dev</span>
-        <span class="tag-pill">CVEs</span>
-        <span class="tag-pill">تهديدات متقدمة</span>
-        <span class="tag-pill">أدوات</span>
-        <span class="tag-pill">Malware</span>
-        <span class="tag-pill">تحليل</span>
+        <span class="tag-item">ثغرات حرجة</span>
+        <span class="tag-item">Red Team</span>
+        <span class="tag-item">Exploit Dev</span>
+        <span class="tag-item">CVEs</span>
+        <span class="tag-item">AI Red Team</span>
+        <span class="tag-item">أدوات</span>
+        <span class="tag-item">Malware</span>
+        <span class="tag-item">تحليل</span>
       </div>
     </div>
+
+    <div class="widget">
+      <div class="widget-title">COMMUNITY</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <a href="https://t.me/OffsecAR" target="_blank" style="font-size:13px;color:#29b6f6;display:flex;align-items:center;gap:6px" dir="ltr">✈ Telegram</a>
+        <a href="https://twitter.com/OffsecARE" target="_blank" style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px" dir="ltr">𝕏 Twitter / X</a>
+      </div>
+    </div>
+
   </aside>
 </div>
 
 <footer>
   <span class="footer-logo">OffsecAR</span>
   <span class="footer-made">صُنع في السعودية 🇸🇦</span>
-  <span dir="ltr">malekalthubiany.github.io/OffsecAR</span>
+  <span style="direction:ltr;font-family:var(--mono);font-size:11px">malekalthubiany.github.io/OffsecAR</span>
 </footer>
 
 </body>
