@@ -25,9 +25,9 @@
   <rect x="54" y="160" width="972" height="1" fill="#2a2a2a"/>
   
   <!-- العنوان -->
-  <text x="1010" y="260" class="title" text-anchor="end" direction="rtl">ثغرة Zero-Day في خوادم TrueConf</text>
-  <text x="1010" y="340" class="title" text-anchor="end" direction="rtl">تتيح للمهاجمين تنفيذ ملفات خبيثة</text>
-  <text x="1010" y="420" class="title" text-anchor="end" direction="rtl">على جميع الأجهزة المتصلة</text>
+  <text x="1010" y="260" class="title" text-anchor="end" direction="rtl">ثغرة zero-day في خوادم TrueConf</text>
+  <text x="1010" y="340" class="title" text-anchor="end" direction="rtl">تُمكّن المهاجمين من تنفيذ ملفات</text>
+  <text x="1010" y="420" class="title" text-anchor="end" direction="rtl">خبيثة على جميع الأجهزة المتصلة</text>
   
   <!-- خط أحمر -->
   <rect x="54" y="480" width="60" height="4" fill="#e03c2a" rx="2"/>
