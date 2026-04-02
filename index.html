@@ -249,12 +249,10 @@ footer {
     OffsecAR
   </div>
   <div class="nav-links">
-    <a href="/" class="active">الرئيسية</a>
+    <a href="/OffsecAR/" class="active">الرئيسية</a>
     <a href="/OffsecAR/blogs">Blogs</a>
     <a href="/OffsecAR/ai-red-team">AI Red Team</a>
-    <a href="/OffsecAR/archive">الأرشيف</a>
-    <a href="/feed.xml" dir="ltr">RSS</a>
-    <a href="https://twitter.com/OffsecAR" dir="ltr" target="_blank">Twitter / X</a>
+    <a href="https://twitter.com/OffsecARE" dir="ltr" target="_blank">Twitter / X</a>
   </div>
 </nav>
 
@@ -303,7 +301,7 @@ footer {
     </div>
 
     {% for post in site.posts limit:10 offset:1 %}
-    <article class="post-card fade-in" onclick="location.href='{{ post.url }}'">
+    <article class="post-card fade-in" onclick="location.href='{{ post.url | prepend: site.baseurl }}'">
       <div class="post-index">{{ forloop.index | prepend: "0" | slice: -2, 2 }}</div>
       <div>
         <div class="post-title">{{ post.title }}</div>
@@ -361,7 +359,7 @@ footer {
 <footer>
   <span class="footer-logo">OffsecAR</span>
   <span>OffsecAR · تحديث تلقائي كل يوم</span>
-  <span dir="ltr">offsec-ar.github.io</span>
+  <span dir="ltr">malekalthubiany.github.io/OffsecAR</span>
 </footer>
 
 </body>
