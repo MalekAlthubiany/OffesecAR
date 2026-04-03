@@ -307,10 +307,9 @@ footer {
     <div class="section-hdr" style="margin-top:40px;padding-top:32px;border-top:1px solid var(--border)">
       <span class="section-title-sm">أخبار سابقة</span>
     </div>
-    {% assign old_posts = site.posts | where_exp: "p", "p.date contains today == false" %}
-    {% for post in site.posts limit:8 offset:1 %}
+    {% for post in site.posts limit:10 offset:1 %}
       {% assign post_date = post.date | date: "%Y-%m-%d" %}
-      {% unless post_date == today %}
+      {% if post_date != today %}
       <article class="post-item" onclick="location.href='{{ post.url | prepend: site.baseurl }}'">
         <div class="post-num">{{ forloop.index | prepend: "0" | slice: -2, 2 }}</div>
         <div>
@@ -321,7 +320,7 @@ footer {
         <span class="post-badge sev-{{ post.severity_en }}">{{ post.severity }}</span>
         {% endif %}
       </article>
-      {% endunless %}
+      {% endif %}
     {% endfor %}
   </main>
 
