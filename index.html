@@ -1,150 +1,394 @@
 ---
 layout: none
-permalink: /news/
 ---
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>الأخبار · OffsecAR</title>
-<meta name="description" content="أحدث أخبار Offensive Security بالعربي — ثغرات، هجمات، وتحليلات يومية">
+<title>OffsecAR · الأمن الهجومي بالعربي</title>
+<meta name="description" content="مجتمع عربي متخصص في Offensive Security — أخبار ومقالات يومية بالعربي">
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Sans+Arabic:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0c0c0c;--bg2:#141414;--red:#e03c2a;--white:#f0ede8;--muted:#6b6b6b;--border:rgba(255,255,255,0.07);--serif:'Noto Naskh Arabic',serif;--sans:'Noto Sans Arabic',sans-serif;--mono:'IBM Plex Mono',monospace;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--white);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
-a{color:inherit;text-decoration:none;}
-nav{position:sticky;top:0;z-index:100;background:rgba(12,12,12,0.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 6%;display:flex;align-items:center;justify-content:space-between;height:58px;}
-.nav-logo{font-weight:900;font-size:17px;display:flex;align-items:center;gap:9px;}
-.nav-dot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:blink 2s ease-in-out infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.nav-links{display:flex;gap:24px;font-size:13px;color:var(--muted);}
-.nav-links a:hover{color:var(--white);transition:color .2s;}
-.nav-links a.active{color:var(--red);}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0c0c0c;
+  --bg2: #141414;
+  --bg3: #1c1c1c;
+  --red: #e03c2a;
+  --white: #f0ede8;
+  --muted: #6b6b6b;
+  --border: rgba(255,255,255,0.07);
+  --serif: 'Noto Naskh Arabic', serif;
+  --sans: 'Noto Sans Arabic', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--white); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
 
-.page-header{padding:56px 6% 44px;border-bottom:1px solid var(--border);}
-.page-eyebrow{font-size:10px;font-weight:600;color:var(--red);letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px;direction:ltr;}
-.page-title{font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-weight:700;line-height:1.3;margin-bottom:12px;}
-.page-desc{font-size:15px;font-weight:300;color:rgba(240,237,232,.5);line-height:1.8;max-width:500px;}
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(12,12,12,0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 6%;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 58px;
+}
+.nav-logo { font-weight: 900; font-size: 17px; display: flex; align-items: center; gap: 9px; }
+.nav-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); animation: blink 2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.nav-links { display: flex; gap: 24px; font-size: 13px; color: var(--muted); }
+.nav-links a:hover { color: var(--white); transition: color .2s; }
+.nav-links a.active { color: var(--red); }
 
-/* فلاتر */
-.filters{display:flex;gap:8px;padding:20px 6%;border-bottom:1px solid var(--border);flex-wrap:wrap;}
-.filter-btn{font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .2s;background:transparent;white-space:nowrap;}
-.filter-btn:hover,.filter-btn.active{color:var(--white);border-color:var(--red);background:rgba(224,60,42,.1);}
+/* ── HERO / INTRO ── */
+.hero {
+  padding: 72px 6% 64px;
+  border-bottom: 1px solid var(--border);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.hero-label {
+  font-size: 10px; font-weight: 600; color: var(--red);
+  letter-spacing: .12em; text-transform: uppercase;
+  margin-bottom: 20px; direction: ltr;
+}
+.hero-title {
+  font-family: var(--serif);
+  font-size: clamp(32px, 4.5vw, 58px);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -.01em;
+  margin-bottom: 24px;
+  max-width: 700px;
+}
+.hero-title em { font-style: normal; color: var(--red); }
+.hero-body {
+  font-size: 17px; font-weight: 300;
+  color: rgba(240,237,232,.65);
+  line-height: 1.9;
+  max-width: 600px;
+  margin-bottom: 36px;
+}
+.hero-divider { width: 48px; height: 3px; background: var(--red); border-radius: 2px; margin-bottom: 32px; }
 
-/* قائمة الأخبار */
-.news-wrap{max-width:900px;margin:0 auto;padding:40px 6% 80px;}
-.news-group-title{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;direction:ltr;padding:24px 0 14px;border-bottom:1px solid var(--border);margin-bottom:0;}
+/* روابط التواصل */
+.community-links { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 48px; }
+.comm-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  transition: all .2s;
+  direction: ltr;
+}
+.comm-link:hover { color: var(--white); border-color: rgba(255,255,255,.2); transform: translateY(-1px); }
+.comm-link.tg  { border-color: rgba(41,182,246,.2);  color: #29b6f6; }
+.comm-link.tg:hover  { background: rgba(41,182,246,.07); border-color: rgba(41,182,246,.4); }
+.comm-link.wa  { border-color: rgba(37,211,102,.2);  color: #25d366; }
+.comm-link.wa:hover  { background: rgba(37,211,102,.07); border-color: rgba(37,211,102,.4); }
+.comm-link.tw  { border-color: rgba(255,255,255,.1); color: var(--muted); }
+.comm-link.tw:hover  { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.2); color: var(--white); }
+.comm-link.li  { border-color: rgba(10,102,194,.2); color: #0a66c2; }
+.comm-link.li:hover  { background: rgba(10,102,194,.07); border-color: rgba(10,102,194,.4); }
+.comm-link.yt  { border-color: rgba(255,0,0,.2); color: #ff4444; }
+.comm-link.yt:hover  { background: rgba(255,0,0,.07); border-color: rgba(255,0,0,.4); }
+.comm-icon { font-size: 15px; }
 
-.news-item{display:grid;grid-template-columns:52px 1fr auto;gap:16px;align-items:start;padding:20px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;}
-.news-item:last-child{border-bottom:none;}
-.news-item:hover .news-title{color:var(--red);}
-.news-num{font-family:var(--mono);font-size:11px;color:var(--muted);padding-top:3px;direction:ltr;}
-.news-eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
-.news-cat{font-size:10px;font-weight:600;color:var(--red);border:1px solid rgba(224,60,42,.3);border-radius:3px;padding:2px 7px;letter-spacing:.05em;}
-.news-date{font-size:11px;color:var(--muted);font-family:var(--mono);direction:ltr;}
-.news-cve{font-size:11px;color:var(--red);font-family:var(--mono);direction:ltr;}
-.news-title{font-family:var(--serif);font-size:18px;font-weight:600;line-height:1.5;margin-bottom:6px;transition:color .2s;}
-.news-excerpt{font-size:13px;color:rgba(240,237,232,.45);line-height:1.7;max-width:560px;}
-.sev-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;white-space:nowrap;direction:ltr;}
-.sev-critical{background:rgba(224,60,42,.1);color:#e03c2a;border:1px solid rgba(224,60,42,.2);}
-.sev-high{background:rgba(232,136,78,.1);color:#e8884e;border:1px solid rgba(232,136,78,.2);}
-.sev-medium{background:rgba(232,196,78,.1);color:#c8a430;border:1px solid rgba(232,196,78,.2);}
+/* آخر خبر */
+.latest-label {
+  font-size: 10px; font-weight: 600; color: var(--muted);
+  letter-spacing: .1em; text-transform: uppercase;
+  margin-bottom: 16px; direction: ltr;
+}
+.latest-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 28px;
+  background: var(--bg2);
+  max-width: 680px;
+  cursor: pointer;
+  transition: border-color .2s;
+}
+.latest-card:hover { border-color: rgba(255,255,255,.15); }
+.latest-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.latest-tag { font-size: 10px; font-weight: 600; color: var(--red); border: 1px solid rgba(224,60,42,.35); border-radius: 3px; padding: 2px 8px; letter-spacing: .06em; }
+.latest-date { font-size: 11px; color: var(--muted); font-family: var(--mono); direction: ltr; }
+.latest-title { font-family: var(--serif); font-size: 20px; font-weight: 600; line-height: 1.55; margin-bottom: 10px; }
+.latest-excerpt { font-size: 13px; color: rgba(240,237,232,.5); line-height: 1.75; }
+.latest-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; flex-wrap: wrap; gap: 8px; }
+.sev-badge { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 4px; direction: ltr; }
+.sev-critical { background: rgba(224,60,42,.1); color: #e03c2a; border: 1px solid rgba(224,60,42,.2); }
+.sev-high     { background: rgba(232,136,78,.1); color: #e8884e; border: 1px solid rgba(232,136,78,.2); }
+.sev-medium   { background: rgba(232,196,78,.1); color: #c8a430; border: 1px solid rgba(232,196,78,.2); }
+.sev-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.read-more-link { font-size: 12px; color: var(--muted); }
+.read-more-link:hover { color: var(--red); }
 
-.empty{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;}
+/* ── GRID ── */
+.page-body {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 0;
+  padding: 0 6%;
+}
+@media(max-width:860px) { .page-body { grid-template-columns: 1fr; } }
 
-footer{border-top:1px solid var(--border);padding:24px 6%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);}
-.footer-logo{font-weight:900;font-size:15px;color:var(--white);}
+.posts-col { border-left: 1px solid var(--border); padding: 48px 0 64px 48px; }
+.sidebar-col { padding: 48px 0 64px 0; }
+
+.section-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 28px;
+}
+.section-title-sm { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; direction: ltr; }
+.section-link { font-size: 12px; color: var(--muted); }
+.section-link:hover { color: var(--red); }
+
+/* بطاقة المنشور */
+.post-item {
+  display: grid; grid-template-columns: 44px 1fr auto;
+  gap: 14px; align-items: start;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.post-item:last-child { border-bottom: none; }
+.post-item:hover .post-item-title { color: var(--red); }
+.post-num { font-family: var(--mono); font-size: 11px; color: var(--muted); padding-top: 2px; direction: ltr; }
+.post-item-title { font-family: var(--serif); font-size: 16px; font-weight: 600; line-height: 1.5; margin-bottom: 4px; transition: color .2s; }
+.post-item-meta { font-size: 11px; color: var(--muted); direction: ltr; font-family: var(--mono); }
+.post-badge { font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 3px; white-space: nowrap; }
+
+/* سايدبار */
+.widget { margin-bottom: 36px; }
+.widget-title { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 14px; direction: ltr; }
+.stat-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.stat-item:last-child { border-bottom: none; }
+.stat-label { color: var(--muted); }
+.stat-value { font-family: var(--mono); font-size: 12px; }
+.stat-value.red { color: var(--red); }
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag-item { font-size: 11px; color: var(--muted); border: 1px solid var(--border); border-radius: 4px; padding: 3px 8px; transition: all .2s; cursor: pointer; }
+.tag-item:hover { color: var(--white); border-color: rgba(255,255,255,.2); }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 6%;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  font-size: 12px; color: var(--muted);
+}
+.footer-logo { font-weight: 900; font-size: 15px; color: var(--white); }
+.footer-made { display: flex; align-items: center; gap: 6px; }
+
+/* أنيميشن */
+.fade-up { animation: fadeUp .5s ease both; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+.d1{animation-delay:.05s} .d2{animation-delay:.1s} .d3{animation-delay:.15s}
 </style>
 </head>
 <body>
 
 <nav>
   <a href="/OffsecAR/" class="nav-logo">
-    <span class="nav-dot"></span>OffsecAR
+    <span class="nav-dot"></span>
+    OffsecAR
   </a>
   <div class="nav-links">
-    <a href="/OffsecAR/">الرئيسية</a>
-    <a href="/OffsecAR/news" class="active">الأخبار</a>
+    <a href="/OffsecAR/" class="active">الرئيسية</a>
+    <a href="/OffsecAR/news">الأخبار</a>
     <a href="/OffsecAR/blogs">Blogs</a>
     <a href="/OffsecAR/ai-security">الأمن في الذكاء الاصطناعي</a>
     <a href="https://twitter.com/OffsecAR" dir="ltr" target="_blank">Twitter / X</a>
   </div>
 </nav>
 
-<header class="page-header">
-  <div class="page-eyebrow">NEWS · أخبار يومية</div>
-  <h1 class="page-title">أخبار الأمن الهجومي</h1>
-  <p class="page-desc">ثغرات، هجمات، وتحليلات — تُنشر يومياً من أبرز مصادر Offensive Security.</p>
-</header>
+<!-- HERO -->
+<div style="border-bottom:1px solid var(--border)">
+<section class="hero fade-up">
+  <div class="hero-label">OFFENSIVE SECURITY · مجتمع عربي</div>
+  <h1 class="hero-title">
+    الأمن الهجومي<br>
+    <em>بالعربي</em>
+  </h1>
+  <p class="hero-body">
+    نحن مجتمع عربي متخصص في Offensive Security — نجمع المختصين والمهتمين في هذا المجال ونقدم يومياً أبرز الثغرات والتقنيات والأدوات. هدفنا تعزيز المحتوى العربي التقني العميق، ودعم الشركات السعودية في هذا القطاع.
+  </p>
+  <div class="hero-divider"></div>
 
-<div class="filters">
-  <button class="filter-btn active" onclick="filterNews('all',this)">الكل</button>
-  <button class="filter-btn" onclick="filterNews('حرجة',this)">حرجة</button>
-  <button class="filter-btn" onclick="filterNews('عالية',this)">عالية</button>
-  <button class="filter-btn" onclick="filterNews('ثغرة حرجة',this)">ثغرات</button>
-  <button class="filter-btn" onclick="filterNews('تقنية هجوم',this)">تقنيات</button>
-  <button class="filter-btn" onclick="filterNews('تهديد متقدم',this)">تهديدات</button>
-</div>
+  <!-- روابط التواصل -->
+  <div class="community-links fade-up d1">
+    <a href="https://t.me/OffsecAR" class="comm-link tg" target="_blank">
+      <span class="comm-icon">✈</span> Telegram
+    </a>
+    <a href="https://wa.me/OffsecAR" class="comm-link wa" target="_blank">
+      <span class="comm-icon">●</span> WhatsApp
+    </a>
+    <a href="https://twitter.com/OffsecAR" class="comm-link tw" target="_blank">
+      <span class="comm-icon">𝕏</span> Twitter / X
+    </a>
+    <a href="https://linkedin.com/company/OffsecAR" class="comm-link li" target="_blank">
+      <span class="comm-icon">in</span> LinkedIn
+    </a>
+    <a href="https://youtube.com/@OffsecAR" class="comm-link yt" target="_blank">
+      <span class="comm-icon">▶</span> YouTube
+    </a>
+  </div>
 
-<div class="news-wrap">
-  {% assign all_posts = site.posts %}
-  {% assign current_date = "" %}
-
-  {% if all_posts.size > 0 %}
-    {% for post in all_posts %}
-      {% assign post_date = post.date | date: "%Y-%m-%d" %}
-      {% if post_date != current_date %}
-        {% assign current_date = post_date %}
-        <div class="news-group-title">{{ post.date | date: "%A %d %B %Y" }}</div>
-      {% endif %}
-
-      <article class="news-item"
-        data-severity="{{ post.severity }}"
-        data-category="{{ post.category }}"
-        onclick="location.href='{{ post.url | prepend: site.baseurl }}'">
-        <div class="news-num">{{ forloop.index | prepend: "0" | slice: -2, 2 }}</div>
-        <div>
-          <div class="news-eyebrow">
-            <span class="news-cat">{{ post.category | upcase }}</span>
-            <span class="news-date">{{ post.date | date: "%d %b %Y" }}</span>
-            {% if post.cve and post.cve != "" and post.cve != "None" %}
-            <span class="news-cve">{{ post.cve }}</span>
-            {% endif %}
-          </div>
-          <div class="news-title">{{ post.title }}</div>
-          <div class="news-excerpt">{{ post.excerpt | strip_html | truncatewords: 22 }}</div>
-        </div>
-        {% if post.severity %}
-        <span class="sev-badge sev-{{ post.severity_en }}">
-          {{ post.severity }}{% if post.cvss and post.cvss != "" and post.cvss != "None" %} · CVSS {{ post.cvss }}{% endif %}
+  <!-- آخر خبر -->
+  {% assign latest = site.posts.first %}
+  {% if latest %}
+  <div class="fade-up d2">
+    <div class="latest-label">آخر خبر</div>
+    <div class="latest-card" onclick="location.href='{{ latest.url | prepend: site.baseurl }}'">
+      <div class="latest-eyebrow">
+        <span class="latest-tag">{{ latest.category | upcase }}</span>
+        <span class="latest-date">{{ latest.date | date: "%d %b %Y" }}</span>
+        {% if latest.cve and latest.cve != "" %}
+        <span class="latest-date" style="color:var(--red)">{{ latest.cve }}</span>
+        {% endif %}
+      </div>
+      <div class="latest-title">{{ latest.title }}</div>
+      <div class="latest-excerpt">{{ latest.excerpt | strip_html | truncatewords: 28 }}</div>
+      <div class="latest-footer">
+        {% if latest.severity %}
+        <span class="sev-badge sev-{{ latest.severity_en }}">
+          <span class="sev-dot"></span>
+          خطورة {{ latest.severity }}{% if latest.cvss and latest.cvss != "" %} · CVSS {{ latest.cvss }}{% endif %}
         </span>
         {% endif %}
-      </article>
-    {% endfor %}
-  {% else %}
-    <div class="empty">الأخبار تُنشر يومياً — تعال غداً</div>
+        <span class="read-more-link">اقرأ التحليل ←</span>
+      </div>
+    </div>
+  </div>
   {% endif %}
+</section>
+</div>
+
+<!-- BODY -->
+<div class="page-body">
+
+  <!-- أخبار اليوم -->
+  <main class="posts-col fade-up d3">
+    <div class="section-hdr">
+      <span class="section-title-sm">أخبار اليوم</span>
+      <a href="/OffsecAR/blogs" class="section-link">Blogs ←</a>
+    </div>
+
+    {% assign today = site.time | date: "%Y-%m-%d" %}
+    {% assign todays_posts = site.posts | where_exp: "p", "p.date contains today" %}
+    {% if todays_posts.size > 0 %}
+      {% for post in todays_posts limit:10 %}
+      <article class="post-item" onclick="location.href='{{ post.url | prepend: site.baseurl }}'">
+        <div class="post-num">{{ forloop.index | prepend: "0" | slice: -2, 2 }}</div>
+        <div>
+          <div class="post-item-title">{{ post.title }}</div>
+          <div class="post-item-meta">{{ post.date | date: "%d %b %Y" }} · {{ post.category }}</div>
+        </div>
+        {% if post.severity %}
+        <span class="post-badge sev-{{ post.severity_en }}">{{ post.severity }}</span>
+        {% endif %}
+      </article>
+      {% endfor %}
+    {% else %}
+      <div style="padding:24px 0;color:var(--muted);font-size:14px">لا توجد أخبار اليوم بعد — تعال لاحقاً</div>
+    {% endif %}
+
+    <div class="section-hdr" style="margin-top:40px;padding-top:32px;border-top:1px solid var(--border)">
+      <span class="section-title-sm">أخبار سابقة</span>
+    </div>
+    {% for post in site.posts limit:10 offset:1 %}
+      {% assign post_date = post.date | date: "%Y-%m-%d" %}
+      {% if post_date != today %}
+      <article class="post-item" onclick="location.href='{{ post.url | prepend: site.baseurl }}'">
+        <div class="post-num">{{ forloop.index | prepend: "0" | slice: -2, 2 }}</div>
+        <div>
+          <div class="post-item-title">{{ post.title }}</div>
+          <div class="post-item-meta">{{ post.date | date: "%d %b %Y" }} · {{ post.category }}</div>
+        </div>
+        {% if post.severity %}
+        <span class="post-badge sev-{{ post.severity_en }}">{{ post.severity }}</span>
+        {% endif %}
+      </article>
+      {% endif %}
+    {% endfor %}
+  </main>
+
+  <!-- سايدبار -->
+  <aside class="sidebar-col" style="padding-right:40px">
+
+    <div class="widget">
+      <div class="widget-title">آخر المقالات</div>
+      {% for blog in site.blogs limit:4 %}
+      <div class="stat-item" style="cursor:pointer;flex-direction:column;align-items:flex-start;gap:4px" onclick="location.href='{{ blog.url | prepend: site.baseurl }}'">
+        <span style="font-size:13px;font-weight:500;color:var(--white);line-height:1.4">{{ blog.title | truncatewords: 8 }}</span>
+        <span style="font-size:10px;font-weight:600;color:var(--red);letter-spacing:.05em">{{ blog.category }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="widget">
+      <div class="widget-title">STATS</div>
+      <div class="stat-item">
+        <span class="stat-label">إجمالي الأخبار</span>
+        <span class="stat-value">{{ site.posts | size }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">إجمالي المقالات</span>
+        <span class="stat-value">{{ site.blogs | size }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">ثغرات حرجة</span>
+        <span class="stat-value red">{{ site.posts | where: "severity", "حرجة" | size }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">آخر تحديث</span>
+        <span class="stat-value">{{ site.time | date: "%d %b" }}</span>
+      </div>
+    </div>
+
+    <div class="widget">
+      <div class="widget-title">TOPICS</div>
+      <div class="tag-cloud">
+        <span class="tag-item">ثغرات حرجة</span>
+        <span class="tag-item">Red Team</span>
+        <span class="tag-item">Exploit Dev</span>
+        <span class="tag-item">CVEs</span>
+        <span class="tag-item">الأمن في الذكاء الاصطناعي</span>
+        <span class="tag-item">أدوات</span>
+        <span class="tag-item">Malware</span>
+        <span class="tag-item">تحليل</span>
+      </div>
+    </div>
+
+    <div class="widget">
+      <div class="widget-title">COMMUNITY</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <a href="https://t.me/OffsecAR" target="_blank" style="font-size:13px;color:#29b6f6;display:flex;align-items:center;gap:6px" dir="ltr">✈ Telegram</a>
+        <a href="https://twitter.com/OffsecAR" target="_blank" style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px" dir="ltr">𝕏 Twitter / X</a>
+        <a href="https://linkedin.com/company/OffsecAR" target="_blank" style="font-size:13px;color:#0a66c2;display:flex;align-items:center;gap:6px" dir="ltr">in LinkedIn</a>
+        <a href="https://youtube.com/@OffsecAR" target="_blank" style="font-size:13px;color:#ff4444;display:flex;align-items:center;gap:6px" dir="ltr">▶ YouTube</a>
+      </div>
+    </div>
+
+  </aside>
 </div>
 
 <footer>
-  <a href="/OffsecAR/" class="footer-logo">OffsecAR</a>
-  <span>صُنع في السعودية 🇸🇦</span>
-  <span dir="ltr" style="font-family:var(--mono);font-size:11px">malekalthubiany.github.io/OffsecAR</span>
+  <span class="footer-logo">OffsecAR</span>
+  <span class="footer-made">صُنع في السعودية 🇸🇦</span>
+  <span style="direction:ltr;font-family:var(--mono);font-size:11px">malekalthubiany.github.io/OffsecAR</span>
 </footer>
 
-<script>
-function filterNews(val, btn) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.news-item').forEach(item => {
-    if (val === 'all') { item.style.display = 'grid'; return; }
-    const sev = item.dataset.severity || '';
-    const cat = item.dataset.category || '';
-    item.style.display = (sev === val || cat === val) ? 'grid' : 'none';
-  });
-}
-</script>
 </body>
 </html>
