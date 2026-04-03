@@ -29,3 +29,7 @@ plugins:
 
 markdown: kramdown
 highlighter: rouge
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
