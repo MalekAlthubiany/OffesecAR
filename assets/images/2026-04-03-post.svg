@@ -25,9 +25,9 @@
   <rect x="54" y="160" width="972" height="1" fill="#2a2a2a"/>
   
   <!-- العنوان -->
-  <text x="1010" y="260" class="title" text-anchor="end" direction="rtl">ثغرة حرجة بتقييم 9.8 في</text>
-  <text x="1010" y="340" class="title" text-anchor="end" direction="rtl">أنظمة Cisco IMC تتيح للمهاجمين</text>
-  <text x="1010" y="420" class="title" text-anchor="end" direction="rtl">السيطرة الكاملة عن بُعد دون مصادقة</text>
+  <text x="1010" y="260" class="title" text-anchor="end" direction="rtl">ثغرة حرجة في Cisco IMC</text>
+  <text x="1010" y="340" class="title" text-anchor="end" direction="rtl">بتقييم 9.8 تتيح للمهاجمين اختراق</text>
+  <text x="1010" y="420" class="title" text-anchor="end" direction="rtl">الأنظمة عن بُعد دون مصادقة</text>
   
   <!-- خط أحمر -->
   <rect x="54" y="480" width="60" height="4" fill="#e03c2a" rx="2"/>

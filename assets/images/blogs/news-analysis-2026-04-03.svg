@@ -27,8 +27,8 @@
   
   <!-- العنوان -->
   <text x="1140" y="280" class="title" text-anchor="end" direction="rtl">React2Shell: كيف حوّل المهاجمون ثغرة</text>
-  <text x="1140" y="360" class="title" text-anchor="end" direction="rtl">في Next.js إلى عملية سرقة</text>
-  <text x="1140" y="440" class="title" text-anchor="end" direction="rtl">بيانات ضخمة طالت 766 خادمًا</text>
+  <text x="1140" y="360" class="title" text-anchor="end" direction="rtl">Next.js إلى عملية حصاد هائلة</text>
+  <text x="1140" y="440" class="title" text-anchor="end" direction="rtl">لبيانات الاعتماد عبر 766 خادمًا</text>
   
   <!-- خط أحمر فاصل -->
   <rect x="54" y="500" width="80" height="4" fill="#9de84e" rx="2"/>
