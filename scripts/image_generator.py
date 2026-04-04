@@ -1,164 +1,179 @@
 #!/usr/bin/env python3
 """
-مولّد الصور - يستخدم HTML/CSS ويحوّلها لـ PNG عبر محاكي المتصفح
-أو SVG مباشرة مع دعم عربي صحيح
+مولّد الصور PNG - باستخدام Pillow مع arabic-reshaper
 """
 
 from pathlib import Path
 from datetime import datetime, timezone
-import re
+
+try:
+    import arabic_reshaper
+    from bidi.algorithm import get_display
+    HAS_ARABIC = True
+except ImportError:
+    HAS_ARABIC = False
+
+from PIL import Image, ImageDraw, ImageFont
+
+def fix_arabic(text: str) -> str:
+    if HAS_ARABIC and text:
+        try:
+            reshaped = arabic_reshaper.reshape(text)
+            return get_display(reshaped)
+        except:
+            pass
+    return text
+
+def load_font(size: int, bold: bool = False) -> ImageFont.ImageFont:
+    paths = [
+        f"/usr/share/fonts/truetype/noto/NotoSansArabic-{'Bold' if bold else 'Regular'}.ttf",
+        f"/usr/share/fonts/opentype/noto/NotoSansArabic-{'Bold' if bold else 'Regular'}.otf",
+        f"/usr/share/fonts/truetype/noto/NotoNaskhArabic-{'Bold' if bold else 'Regular'}.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    ]
+    for p in paths:
+        if Path(p).exists():
+            return ImageFont.truetype(p, size)
+    return ImageFont.load_default()
+
+def wrap_text(text: str, font, draw, max_width: int) -> list[str]:
+    words = text.split()
+    lines, line = [], []
+    for word in words:
+        test = " ".join(line + [word])
+        bbox = draw.textbbox((0, 0), test, font=font)
+        if bbox[2] - bbox[0] <= max_width:
+            line.append(word)
+        else:
+            if line: lines.append(" ".join(line))
+            line = [word]
+    if line: lines.append(" ".join(line))
+    return lines
+
+CAT_COLORS = {
+    "منهجية":      "#e03c2a",
+    "تقنية":       "#e8884e",
+    "أداة":        "#4e9de8",
+    "تحليل":       "#9de84e",
+    "الأمن الهجومي في الذكاء الاصطناعي": "#b44ee8",
+    "AI Red Team": "#b44ee8",
+}
 
 def create_blog_image_svg(title: str, category: str, slug: str, images_dir: Path) -> Path:
-    """يصمم صورة hero بأسلوب ثمانية — SVG مع دعم عربي كامل"""
-    
-    cat_colors = {
-        "منهجية":      "#e03c2a",
-        "تقنية":       "#e8884e", 
-        "أداة":        "#4e9de8",
-        "تحليل":       "#9de84e",
-        "AI Red Team": "#b44ee8",
-    }
-    cat_color = cat_colors.get(category, "#e03c2a")
+    """يصمم صورة blog PNG 1200x630"""
+    W, H = 1200, 630
+    cat_color = CAT_COLORS.get(category, "#e03c2a")
     date_str = datetime.now(timezone.utc).strftime("%d %b %Y")
-    
-    # اقتصر العنوان إن كان طويلاً
-    words = title.split()
-    if len(words) > 8:
-        line1 = " ".join(words[:5])
-        line2 = " ".join(words[5:10])
-        line3 = " ".join(words[10:]) if len(words) > 10 else ""
-    elif len(words) > 4:
-        line1 = " ".join(words[:4])
-        line2 = " ".join(words[4:])
-        line3 = ""
-    else:
-        line1 = title
-        line2 = ""
-        line3 = ""
 
-    # احسب y للعنوان حسب عدد الأسطر
-    title_y1 = 280
-    title_y2 = 360
-    title_y3 = 440
-    line_after_title = title_y3 + 60 if line3 else (title_y2 + 60 if line2 else title_y1 + 80)
+    img = Image.new("RGB", (W, H), "#0d0d0d")
+    draw = ImageDraw.Draw(img)
 
-    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <defs>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@700&amp;family=Noto+Sans+Arabic:wght@400;500&amp;display=swap');
-      .title {{ font-family: "Noto Naskh Arabic", serif; font-size: 52px; font-weight: 700; fill: #f0ede8; }}
-      .cat   {{ font-family: "Noto Sans Arabic", sans-serif; font-size: 20px; font-weight: 500; fill: {cat_color}; }}
-      .brand {{ font-family: "Noto Sans Arabic", sans-serif; font-size: 18px; fill: #444; }}
-      .date  {{ font-family: monospace; font-size: 16px; fill: #444; }}
-    </style>
-  </defs>
-  
-  <!-- خلفية -->
-  <rect width="1200" height="630" fill="#0d0d0d"/>
-  
-  <!-- خطوط الشبكة الخفية -->
-  {''.join(f'<line x1="{i}" y1="0" x2="{i}" y2="630" stroke="#111" stroke-width="1"/>' for i in range(0, 1200, 60))}
-  
-  <!-- شريط علوي -->
-  <rect x="0" y="0" width="1200" height="5" fill="{cat_color}"/>
-  
-  <!-- شريط سفلي -->
-  <rect x="0" y="625" width="1200" height="5" fill="#1a1a1a"/>
-  
-  <!-- تاق التصنيف -->
-  <rect x="54" y="40" width="180" height="40" rx="6" fill="#1a0804" stroke="{cat_color}" stroke-width="1"/>
-  <text x="144" y="65" class="cat" text-anchor="middle">{category}</text>
-  
-  <!-- العنوان -->
-  <text x="1140" y="{title_y1}" class="title" text-anchor="end" direction="rtl">{line1}</text>
-  {f'<text x="1140" y="{title_y2}" class="title" text-anchor="end" direction="rtl">{line2}</text>' if line2 else ''}
-  {f'<text x="1140" y="{title_y3}" class="title" text-anchor="end" direction="rtl">{line3}</text>' if line3 else ''}
-  
-  <!-- خط أحمر فاصل -->
-  <rect x="54" y="{line_after_title}" width="80" height="4" fill="{cat_color}" rx="2"/>
-  
-  <!-- شعار وتاريخ -->
-  <text x="60" y="600" class="brand">OffsecAR</text>
-  <text x="1140" y="600" class="date" text-anchor="end">{date_str}</text>
-</svg>'''
+    # خلفية شبكة خفية
+    for i in range(0, W, 60):
+        draw.line([(i, 0), (i, H)], fill="#111111", width=1)
 
-    out_path = images_dir / f"{slug}.svg"
-    out_path.write_text(svg, encoding="utf-8")
-    return out_path
+    # شريط علوي ملون
+    draw.rectangle([0, 0, W, 6], fill=cat_color)
+
+    # فونتات
+    font_cat   = load_font(22)
+    font_title = load_font(54, bold=True)
+    font_small = load_font(20)
+
+    # تاق التصنيف
+    cat_fixed = fix_arabic(category)
+    draw.rounded_rectangle([54, 28, 54+220, 28+42], radius=6, fill="#1a0804", outline=cat_color, width=1)
+    draw.text((164, 49), cat_fixed, font=font_cat, fill=cat_color, anchor="mm")
+
+    # العنوان
+    title_fixed = fix_arabic(title)
+    lines = wrap_text(title_fixed, font_title, draw, W - 140)
+    y = 130
+    for line in lines[:3]:
+        draw.text((W - 70, y), line, font=font_title, fill="#f0ede8", anchor="ra")
+        y += 72
+
+    # خط فاصل أحمر
+    draw.rectangle([54, y + 16, 54 + 80, y + 20], fill=cat_color, outline=None)
+
+    # شعار وتاريخ
+    draw.text((60, H - 44), "OffsecAR", font=font_small, fill="#444444")
+    draw.text((W - 60, H - 44), date_str, font=font_small, fill="#444444", anchor="ra")
+
+    # أيقونات التواصل
+    tw_text = "twitter.com/OffsecAR"
+    li_text = "linkedin.com/company/OffsecAR"
+    draw.text((60, H - 80), f"𝕏  {tw_text}  ·  in  {li_text}", font=font_small, fill="#333333")
+
+    out = images_dir / f"{slug}.png"
+    img.save(out, "PNG")
+    print(f"   🖼️  {out}")
+    return out
 
 
-def create_news_image_svg(headline: str, category: str, severity: str, cvss: str, images_dir: Path, date_str: str) -> Path:
-    """يصمم صورة خبر يومي بأسلوب ثمانية"""
-    
+def create_news_image_svg(headline: str, category: str, severity: str,
+                           cvss: str, images_dir: Path, date_str: str) -> Path:
+    """يصمم صورة خبر PNG 1080x1080"""
+    W, H = 1080, 1080
     sev_colors = {"حرجة": "#e03c2a", "عالية": "#e8884e", "متوسطة": "#e8c44e"}
     sev_col = sev_colors.get(severity, "#e8884e")
-    
-    words = headline.split()
-    if len(words) > 7:
-        line1 = " ".join(words[:5])
-        line2 = " ".join(words[5:10])
-        line3 = " ".join(words[10:]) if len(words) > 10 else ""
-    elif len(words) > 4:
-        line1 = " ".join(words[:4])
-        line2 = " ".join(words[4:])
-        line3 = ""
-    else:
-        line1 = headline
-        line2 = ""
-        line3 = ""
 
-    cvss_text = f"CVSS {cvss}" if cvss and cvss != "None" else ""
-    title_y1 = 260
-    title_y2 = 340
-    title_y3 = 420
+    img = Image.new("RGB", (W, H), "#0d0d0d")
+    draw = ImageDraw.Draw(img)
 
-    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
-  <defs>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@700&amp;family=Noto+Sans+Arabic:wght@400;500&amp;display=swap');
-      .title {{ font-family: "Noto Naskh Arabic", serif; font-size: 50px; font-weight: 700; fill: #f5f5f5; }}
-      .cat   {{ font-family: "Noto Sans Arabic", sans-serif; font-size: 20px; fill: #888; }}
-      .tag   {{ font-family: monospace; font-size: 18px; fill: #e03c2a; letter-spacing: 2px; }}
-      .sev   {{ font-family: "Noto Sans Arabic", sans-serif; font-size: 20px; fill: {sev_col}; }}
-      .brand {{ font-family: "Noto Sans Arabic", sans-serif; font-size: 20px; fill: #555; }}
-    </style>
-  </defs>
-  
-  <rect width="1080" height="1080" fill="#0d0d0d"/>
-  {''.join(f'<line x1="{i}" y1="0" x2="{i}" y2="1080" stroke="#111" stroke-width="1"/>' for i in range(0, 1080, 60))}
-  <rect x="0" y="0" width="1080" height="6" fill="#e03c2a"/>
-  
-  <!-- تاق OffsecAR -->
-  <rect x="54" y="28" width="200" height="38" rx="6" fill="#1a0804" stroke="#e03c2a" stroke-width="1"/>
-  <text x="154" y="52" class="tag" text-anchor="middle">OffsecAR</text>
-  
-  <!-- التصنيف -->
-  <text x="1020" y="110" class="cat" text-anchor="end" direction="rtl">{category}</text>
-  
-  <!-- فاصل -->
-  <rect x="54" y="160" width="972" height="1" fill="#2a2a2a"/>
-  
-  <!-- العنوان -->
-  <text x="1010" y="{title_y1}" class="title" text-anchor="end" direction="rtl">{line1}</text>
-  {f'<text x="1010" y="{title_y2}" class="title" text-anchor="end" direction="rtl">{line2}</text>' if line2 else ''}
-  {f'<text x="1010" y="{title_y3}" class="title" text-anchor="end" direction="rtl">{line3}</text>' if line3 else ''}
-  
-  <!-- خط أحمر -->
-  <rect x="54" y="480" width="60" height="4" fill="#e03c2a" rx="2"/>
-  
-  <!-- درجة الخطورة -->
-  <rect x="54" y="920" width="260" height="44" rx="8" fill="#1a1a1a" stroke="{sev_col}" stroke-width="1"/>
-  <circle cx="80" cy="942" r="7" fill="{sev_col}"/>
-  <text x="96" y="948" class="sev">خطورة {severity}{f"  ·  {cvss_text}" if cvss_text else ""}</text>
-  
-  <!-- فاصل سفلي -->
-  <rect x="54" y="984" width="972" height="1" fill="#2a2a2a"/>
-  
-  <!-- الشعار والتاريخ -->
-  <text x="60" y="1012" class="brand">@OffsecAR</text>
-  <text x="1020" y="1012" class="brand" text-anchor="end">malekalthubiany.github.io/OffsecAR</text>
-</svg>'''
+    for i in range(0, W, 60):
+        draw.line([(i, 0), (i, H)], fill="#111111", width=1)
 
-    out_path = images_dir / f"{date_str}-post.svg"
-    out_path.write_text(svg, encoding="utf-8")
-    return out_path
+    draw.rectangle([0, 0, W, 6], fill="#e03c2a")
+
+    font_tag   = load_font(22)
+    font_title = load_font(52, bold=True)
+    font_body  = load_font(30)
+    font_small = load_font(22)
+
+    # تاق OffsecAR
+    draw.rounded_rectangle([54, 28, 54+200, 28+38], radius=6, fill="#1a0804", outline="#e03c2a", width=1)
+    draw.text((154, 47), "OffsecAR", font=font_tag, fill="#e03c2a", anchor="mm")
+
+    # التصنيف
+    cat_fixed = fix_arabic(category)
+    draw.text((W - 60, 110), cat_fixed, font=font_tag, fill="#888888", anchor="ra")
+
+    # فاصل
+    draw.rectangle([54, 155, W - 54, 157], fill="#2a2a2a")
+
+    # العنوان
+    title_fixed = fix_arabic(headline)
+    lines = wrap_text(title_fixed, font_title, draw, W - 140)
+    y = 220
+    for line in lines[:3]:
+        draw.text((W - 70, y), line, font=font_title, fill="#f5f5f5", anchor="ra")
+        y += 72
+
+    # خط أحمر
+    draw.rectangle([54, y + 16, 54 + 60, y + 20], fill="#e03c2a")
+
+    # درجة الخطورة
+    if severity and severity not in ("", "None"):
+        sev_y = H - 170
+        draw.rounded_rectangle([54, sev_y, 54+280, sev_y+44], radius=8, fill="#1a1a1a", outline=sev_col, width=1)
+        draw.ellipse([80, sev_y+15, 80+14, sev_y+29], fill=sev_col)
+        sev_text = fix_arabic(f"خطورة {severity}")
+        if cvss and cvss not in ("", "None"):
+            sev_text += f"  ·  CVSS {cvss}"
+        draw.text((104, sev_y+22), sev_text, font=font_small, fill=sev_col, anchor="la")
+
+    # فاصل سفلي
+    draw.rectangle([54, H - 100, W - 54, H - 98], fill="#2a2a2a")
+
+    # شعار وتاريخ
+    draw.text((60, H - 74), "@OffsecAR", font=font_small, fill="#555555")
+    draw.text((W - 60, H - 74), date_str, font=font_small, fill="#555555", anchor="ra")
+
+    # أيقونات التواصل
+    draw.text((60, H - 42), "𝕏  twitter.com/OffsecAR  ·  in  linkedin.com/company/OffsecAR", font=font_small, fill="#333333")
+
+    out = images_dir / f"{date_str}-post.png"
+    img.save(out, "PNG")
+    print(f"   🖼️  {out}")
+    return out
