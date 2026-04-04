@@ -1,221 +1,220 @@
 #!/usr/bin/env python3
-"""مولّد صور PNG لكل منصة"""
+"""مولّد صور PNG عبر HTML → Screenshot"""
 
+import os, subprocess, tempfile
 from pathlib import Path
 from datetime import datetime, timezone
-from PIL import Image, ImageDraw, ImageFont
-
-try:
-    import arabic_reshaper
-    from bidi.algorithm import get_display
-    HAS_ARABIC = True
-except ImportError:
-    HAS_ARABIC = False
 
 
-def fix(text: str) -> str:
-    if HAS_ARABIC and text:
+def _html_to_png(html: str, out: Path, width: int, height: int):
+    """يحول HTML لـ PNG عبر chromium headless"""
+    with tempfile.NamedTemporaryFile(suffix=".html", mode="w",
+                                     encoding="utf-8", delete=False) as f:
+        f.write(html)
+        tmp_html = f.name
+
+    cmd = [
+        "chromium-browser", "--headless", "--no-sandbox",
+        "--disable-gpu", "--disable-dev-shm-usage",
+        f"--window-size={width},{height}",
+        f"--screenshot={out}",
+        f"file://{tmp_html}"
+    ]
+    # جرب chromium أو chromium-browser أو google-chrome
+    for browser in ["chromium-browser", "chromium", "google-chrome", "google-chrome-stable"]:
         try:
-            return get_display(arabic_reshaper.reshape(text))
-        except:
-            pass
-    return text
+            cmd[0] = browser
+            subprocess.run(cmd, capture_output=True, timeout=30, check=True)
+            Path(tmp_html).unlink(missing_ok=True)
+            return True
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            continue
 
-
-def font(size: int, bold: bool = False):
-    for p in [
-        f"/usr/share/fonts/truetype/noto/NotoSansArabic-{'Bold' if bold else 'Regular'}.ttf",
-        f"/usr/share/fonts/opentype/noto/NotoSansArabic-{'Bold' if bold else 'Regular'}.otf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-    ]:
-        if Path(p).exists():
-            return ImageFont.truetype(p, size)
-    return ImageFont.load_default()
-
-
-def wrap(text, fnt, draw, max_w):
-    words, lines, line = text.split(), [], []
-    for w in words:
-        test = " ".join(line + [w])
-        if draw.textbbox((0,0), test, font=fnt)[2] <= max_w:
-            line.append(w)
-        else:
-            if line: lines.append(" ".join(line))
-            line = [w]
-    if line: lines.append(" ".join(line))
-    return lines
+    Path(tmp_html).unlink(missing_ok=True)
+    return False
 
 
 CAT_COLORS = {
     "منهجية": "#e03c2a", "تقنية": "#e8884e", "أداة": "#4e9de8",
-    "تحليل": "#7ec845", "الأمن الهجومي في الذكاء الاصطناعي": "#b44ee8",
-    "AI Red Team": "#b44ee8", "ثغرة حرجة": "#e03c2a",
-    "تقنية هجوم": "#e8884e", "تهديد متقدم": "#e8c44e",
+    "تحليل": "#7ec845", "ثغرة حرجة": "#e03c2a", "تقنية هجوم": "#e8884e",
+    "تهديد متقدم": "#e8c44e", "تحليل أخبار": "#7ec845",
+    "الأمن الهجومي في الذكاء الاصطناعي": "#b44ee8",
 }
 SEV_COLORS = {"حرجة": "#e03c2a", "عالية": "#e8884e", "متوسطة": "#e8c44e"}
 
+GOOGLE_FONTS = "https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@700&family=Noto+Sans+Arabic:wght@300;400;500;700&display=swap"
 
-def _base_canvas(w, h, accent="#e03c2a"):
-    img = Image.new("RGB", (w, h), "#0d0d0d")
-    d = ImageDraw.Draw(img)
-    for i in range(0, w, 50):
-        d.line([(i,0),(i,h)], fill="#111", width=1)
-    d.rectangle([0,0,w,4], fill=accent)
-    return img, d
+
+def _card_style(accent="#e03c2a", w=1080, h=1080):
+    return f"""
+<meta charset="UTF-8">
+<link href="{GOOGLE_FONTS}" rel="stylesheet">
+<style>
+* {{ margin:0; padding:0; box-sizing:border-box; }}
+body {{
+  width:{w}px; height:{h}px; overflow:hidden;
+  background:#0d0d0d;
+  font-family:'Noto Sans Arabic',sans-serif;
+  direction:rtl;
+}}
+.bg {{
+  position:absolute; inset:0;
+  background:repeating-linear-gradient(90deg,#111 0,#111 1px,transparent 1px,transparent 50px);
+}}
+.top-bar {{ position:absolute; top:0; left:0; right:0; height:5px; background:{accent}; }}
+.card {{
+  position:absolute; inset:0;
+  padding:44px 54px 36px;
+  display:flex; flex-direction:column; justify-content:space-between;
+}}
+.tag {{
+  display:inline-flex; align-items:center;
+  border:1px solid {accent}44; background:#1a0804;
+  color:{accent}; font-size:17px; font-weight:500;
+  padding:6px 18px; border-radius:6px;
+  width:fit-content;
+}}
+.category {{ color:#555; font-size:17px; text-align:left; }}
+.eyebrow {{ display:flex; justify-content:space-between; align-items:center; }}
+.title {{
+  font-family:'Noto Naskh Arabic',serif;
+  font-size:52px; font-weight:700;
+  color:#f0ede8; line-height:1.5;
+  margin:28px 0 20px;
+}}
+.divider {{ width:50px; height:3px; background:{accent}; border-radius:2px; margin:0 0 22px auto; }}
+.excerpt {{ font-size:28px; font-weight:300; color:#aaa; line-height:1.7; }}
+.footer {{ border-top:1px solid #222; padding-top:16px; }}
+.sev-badge {{
+  display:inline-flex; align-items:center; gap:8px;
+  background:#1a1a1a; border:1px solid {accent}55;
+  color:{accent}; font-size:18px; font-weight:500;
+  padding:7px 16px; border-radius:6px; margin-bottom:14px;
+}}
+.foot-row {{ display:flex; justify-content:space-between; align-items:center; }}
+.handle {{ color:#444; font-size:17px; }}
+.date {{ color:#444; font-size:17px; font-family:monospace; }}
+</style>"""
 
 
 def make_twitter(title, category, severity, cvss, excerpt, date_str, out: Path):
-    """صورة تويتر 1080×1080"""
-    W, H = 1080, 1080
     accent = SEV_COLORS.get(severity, CAT_COLORS.get(category, "#e03c2a"))
-    img, d = _base_canvas(W, H, accent)
-
-    f_tag   = font(20)
-    f_title = font(50, bold=True)
-    f_body  = font(28)
-    f_small = font(19)
-
-    # تاق
-    d.rounded_rectangle([54,26,54+160,26+38], radius=5, fill="#1a0804", outline=accent, width=1)
-    d.text((134,45), fix("OffsecAR"), font=f_tag, fill=accent, anchor="mm")
-
-    # تصنيف يمين
-    d.text((W-54, 45), fix(category), font=f_tag, fill="#666", anchor="ra")
-
-    # خط فاصل
-    d.rectangle([54,82,W-54,83], fill="#222")
-
-    # عنوان
-    lines = wrap(fix(title), f_title, d, W-120)
-    y = 120
-    for line in lines[:3]:
-        d.text((W-60, y), line, font=f_title, fill="#f0ede8", anchor="ra")
-        y += 66
-
-    # خط أحمر
-    d.rectangle([54, y+10, 54+50, y+14], fill=accent)
-    y += 44
-
-    # ملخص
-    body_lines = wrap(fix(excerpt[:300]), f_body, d, W-120)
-    for line in body_lines[:5]:
-        d.text((W-60, y), line, font=f_body, fill="#aaaaaa", anchor="ra")
-        y += 42
-
-    # خطورة
-    if severity and severity not in ("", "None"):
-        sev_y = H-160
-        sev_col = SEV_COLORS.get(severity, "#e8884e")
-        d.rounded_rectangle([54,sev_y,54+260,sev_y+40], radius=6, fill="#1a1a1a", outline=sev_col, width=1)
-        sev_txt = fix(f"خطورة {severity}")
+    sev_html = ""
+    if severity and severity not in ("","None"):
+        sev_txt = f"خطورة {severity}"
         if cvss and cvss not in ("","None"):
-            sev_txt += f"  CVSS {cvss}"
-        d.text((74, sev_y+20), sev_txt, font=f_small, fill=sev_col, anchor="lm")
+            sev_txt += f"  ·  CVSS {cvss}"
+        sev_html = f'<div class="sev-badge">{sev_txt}</div>'
 
-    # فاصل سفلي
-    d.rectangle([54,H-94,W-54,H-93], fill="#222")
-    d.text((60, H-70), "@OffsecAR", font=f_small, fill="#444")
-    d.text((W-60, H-70), date_str, font=f_small, fill="#444", anchor="ra")
+    short = excerpt[:260] + ("..." if len(excerpt) > 260 else "")
+    html = f"""<!DOCTYPE html><html><head>{_card_style(accent,1080,1080)}</head><body>
+<div class="bg"></div><div class="top-bar"></div>
+<div class="card">
+  <div>
+    <div class="eyebrow">
+      <div class="tag">OffsecAR</div>
+      <div class="category">{category}</div>
+    </div>
+    <div class="title">{title}</div>
+    <div class="divider"></div>
+    <div class="excerpt">{short}</div>
+  </div>
+  <div class="footer">
+    {sev_html}
+    <div class="foot-row">
+      <div class="handle">@OffsecAR</div>
+      <div class="date">{date_str}</div>
+    </div>
+  </div>
+</div></body></html>"""
 
-    img.save(out, "PNG")
+    if not _html_to_png(html, out, 1080, 1080):
+        _fallback_png(title, out, 1080, 1080, accent)
     return out
 
 
 def make_linkedin(title, category, excerpt, date_str, out: Path):
-    """صورة لينكدإن 1200×627"""
-    W, H = 1200, 627
     accent = CAT_COLORS.get(category, "#4e9de8")
-    img, d = _base_canvas(W, H, accent)
+    short = excerpt[:220] + ("..." if len(excerpt) > 220 else "")
+    html = f"""<!DOCTYPE html><html><head>{_card_style(accent,1200,627)}</head><body>
+<div class="bg"></div><div class="top-bar"></div>
+<div class="card">
+  <div>
+    <div class="eyebrow">
+      <div class="tag">OffsecAR</div>
+      <div class="category">{category}</div>
+    </div>
+    <div class="title" style="font-size:44px;margin:22px 0 16px;">{title}</div>
+    <div class="divider"></div>
+    <div class="excerpt" style="font-size:24px;">{short}</div>
+  </div>
+  <div class="footer">
+    <div class="foot-row">
+      <div class="handle">linkedin.com/company/OffsecAR</div>
+      <div class="date">{date_str}</div>
+    </div>
+  </div>
+</div></body></html>"""
 
-    f_cat   = font(20)
-    f_title = font(46, bold=True)
-    f_body  = font(26)
-    f_small = font(18)
-
-    # تاق
-    d.rounded_rectangle([54,22,54+160,22+36], radius=5, fill="#0a1a2a", outline=accent, width=1)
-    d.text((134,40), fix("OffsecAR"), font=f_cat, fill=accent, anchor="mm")
-    d.text((W-54,40), fix(category), font=f_cat, fill="#666", anchor="ra")
-    d.rectangle([54,70,W-54,71], fill="#222")
-
-    # عنوان
-    lines = wrap(fix(title), f_title, d, W-120)
-    y = 100
-    for line in lines[:2]:
-        d.text((W-60, y), line, font=f_title, fill="#f0ede8", anchor="ra")
-        y += 60
-
-    d.rectangle([54, y+8, 54+50, y+12], fill=accent)
-    y += 38
-
-    # ملخص
-    body_lines = wrap(fix(excerpt[:250]), f_body, d, W-120)
-    for line in body_lines[:4]:
-        d.text((W-60, y), line, font=f_body, fill="#aaaaaa", anchor="ra")
-        y += 38
-
-    # فوتر
-    d.rectangle([54,H-68,W-54,H-67], fill="#222")
-    d.text((60, H-44), "@OffsecAR  |  linkedin.com/company/OffsecAR", font=f_small, fill="#444")
-    d.text((W-60, H-44), date_str, font=f_small, fill="#444", anchor="ra")
-
-    img.save(out, "PNG")
+    if not _html_to_png(html, out, 1200, 627):
+        _fallback_png(title, out, 1200, 627, accent)
     return out
 
 
 def make_whatsapp(title, category, excerpt, date_str, out: Path):
-    """صورة واتساب 800×800"""
-    W, H = 800, 800
-    accent = CAT_COLORS.get(category, "#25d366")
-    img, d = _base_canvas(W, H, "#1a1a1a")
+    accent = "#25d366"
+    short = excerpt[:200] + ("..." if len(excerpt) > 200 else "")
+    html = f"""<!DOCTYPE html><html><head>{_card_style(accent,800,800)}</head><body>
+<div class="bg"></div>
+<div style="position:absolute;top:0;left:0;bottom:0;width:5px;background:#25d366;"></div>
+<div class="top-bar" style="background:#1a1a1a;"></div>
+<div class="card" style="padding-right:44px;padding-left:24px;">
+  <div>
+    <div class="eyebrow">
+      <div class="tag" style="border-color:#25d36644;color:#25d366;">OffsecAR</div>
+      <div class="category">{category}</div>
+    </div>
+    <div class="title" style="font-size:40px;margin:22px 0 14px;">{title}</div>
+    <div class="divider" style="background:#25d366;"></div>
+    <div class="excerpt" style="font-size:24px;">{short}</div>
+  </div>
+  <div class="footer" style="border-color:#1a1a1a;">
+    <div class="foot-row">
+      <div class="handle" style="color:#333;">@OffsecAR</div>
+      <div class="date" style="color:#333;">{date_str}</div>
+    </div>
+  </div>
+</div></body></html>"""
 
-    # شريط أخضر جانبي
-    d.rectangle([0,0,5,H], fill="#25d366")
-
-    f_cat   = font(18)
-    f_title = font(40, bold=True)
-    f_body  = font(24)
-    f_small = font(17)
-
-    d.text((30, 28), fix("OffsecAR"), font=f_cat, fill="#25d366")
-    d.text((W-30, 28), fix(category), font=f_cat, fill="#555", anchor="ra")
-    d.rectangle([30,60,W-30,61], fill="#222")
-
-    lines = wrap(fix(title), f_title, d, W-80)
-    y = 88
-    for line in lines[:3]:
-        d.text((W-30, y), line, font=f_title, fill="#f0ede8", anchor="ra")
-        y += 56
-
-    d.rectangle([30, y+8, 30+40, y+11], fill="#25d366")
-    y += 36
-
-    body_lines = wrap(fix(excerpt[:220]), f_body, d, W-80)
-    for line in body_lines[:5]:
-        d.text((W-30, y), line, font=f_body, fill="#aaa", anchor="ra")
-        y += 36
-
-    d.rectangle([30,H-60,W-30,H-59], fill="#222")
-    d.text((30, H-38), "@OffsecAR", font=f_small, fill="#333")
-    d.text((W-30, H-38), date_str, font=f_small, fill="#333", anchor="ra")
-
-    img.save(out, "PNG")
+    if not _html_to_png(html, out, 800, 800):
+        _fallback_png(title, out, 800, 800, accent)
     return out
 
 
+def _fallback_png(title, out, w, h, accent):
+    """fallback بسيط لو فشل chromium"""
+    try:
+        from PIL import Image, ImageDraw
+        img = Image.new("RGB", (w,h), "#0d0d0d")
+        d = ImageDraw.Draw(img)
+        d.rectangle([0,0,w,5], fill=accent)
+        d.text((w//2, h//2), "OffsecAR", fill="#333333", anchor="mm")
+        img.save(out, "PNG")
+    except:
+        out.write_bytes(b"")
+
+
+# واجهات قديمة للتوافق
 def create_blog_image_svg(title, category, slug, images_dir: Path):
-    """واجهة قديمة — تولّد صور الثلاث منصات"""
     date_str = datetime.now(timezone.utc).strftime("%d %b %Y")
-    exc = title
-    make_twitter(title, category, "", "", exc, date_str, images_dir / f"{slug}-tw.png")
-    make_linkedin(title, category, exc, date_str, images_dir / f"{slug}-li.png")
-    make_whatsapp(title, category, exc, date_str, images_dir / f"{slug}-wa.png")
-    return images_dir / f"{slug}-tw.png"
+    make_twitter(title, category, "", "", title, date_str, images_dir/f"{slug}-tw.png")
+    make_linkedin(title, category, title, date_str, images_dir/f"{slug}-li.png")
+    make_whatsapp(title, category, title, date_str, images_dir/f"{slug}-wa.png")
+    return images_dir/f"{slug}-tw.png"
 
 
-def create_news_image_svg(headline, category, severity, cvss, images_dir: Path, date_str):
-    """يولّد صور الثلاث منصات للخبر"""
-    make_twitter(headline, category, severity, cvss, headline, date_str, images_dir / f"{date_str}-tw.png")
-    make_linkedin(headline, category, headline, date_str, images_dir / f"{date_str}-li.png")
-    make_whatsapp(headline, category, headline, date_str, images_dir / f"{date_str}-wa.png")
-    return images_dir / f"{date_str}-tw.png"
+def create_news_image_svg(headline, category, severity, cvss, images_dir, date_str):
+    make_twitter(headline, category, severity, cvss, headline, date_str, images_dir/f"{date_str}-tw.png")
+    make_linkedin(headline, category, headline, date_str, images_dir/f"{date_str}-li.png")
+    make_whatsapp(headline, category, headline, date_str, images_dir/f"{date_str}-wa.png")
+    return images_dir/f"{date_str}-tw.png"
