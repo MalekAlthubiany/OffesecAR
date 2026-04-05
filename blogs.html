@@ -35,6 +35,12 @@ nav{position:sticky;top:0;z-index:100;background:rgba(12,12,12,0.92);backdrop-fi
 .filters{display:flex;gap:8px;padding:24px 5%;border-bottom:1px solid var(--border);overflow-x:auto;flex-wrap:wrap;}
 .filter-btn{font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .2s;background:transparent;white-space:nowrap;}
 .filter-btn:hover,.filter-btn.active{color:var(--white);border-color:var(--red);background:rgba(224,60,42,.1);}
+.filter-btn[style].active{color:var(--white) !important;}
+
+.bb-badge{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:12px;color:#4ee8b4;background:rgba(78,232,180,.07);border:1px solid rgba(78,232,180,.2);padding:6px 14px;border-radius:20px;}
+.bb-dot{width:6px;height:6px;border-radius:50%;background:#4ee8b4;flex-shrink:0;}
+.blog-card[data-category="Bug Bounty"] .blog-index{color:#4ee8b4;}
+.blog-card[data-category="Bug Bounty"] .cat-tag{background:rgba(78,232,180,.1);color:#4ee8b4;border-color:rgba(78,232,180,.3);}
 
 /* شبكة المقالات */
 .blogs-grid{max-width:1100px;margin:0 auto;padding:48px 5%;}
@@ -118,6 +124,10 @@ nav{position:sticky;top:0;z-index:100;background:rgba(12,12,12,0.96);backdrop-fi
   <div class="page-eyebrow">BLOGS · مقالات تقنية</div>
   <h1 class="page-title">تعمّق في <span>Offensive Security</span></h1>
   <p class="page-desc">مقالات تقنية عميقة تُكتب يومياً — منهجيات، أدوات، تقنيات هجوم، وتحليلات.</p>
+  <div class="bb-badge">
+    <span class="bb-dot"></span>
+    جديد — صيد الثغرات: writeups من منصات Bug Bounty بأسلوبنا
+  </div>
 </header>
 
 <div class="filters">
@@ -126,6 +136,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(12,12,12,0.96);backdrop-fi
   <button class="filter-btn" onclick="filterBlogs('تقنية', this)">تقنية</button>
   <button class="filter-btn" onclick="filterBlogs('أداة', this)">أدوات</button>
   <button class="filter-btn" onclick="filterBlogs('تحليل', this)">تحليل</button>
+  <button class="filter-btn" onclick="filterBlogs('Bug Bounty',this)" style="border-color:rgba(78,232,180,.3);color:#4ee8b4;">صيد الثغرات</button>
+  <button class="filter-btn" onclick="filterBlogs('الأمن الهجومي في الذكاء الاصطناعي',this)" style="border-color:rgba(180,78,232,.3);color:#b44ee8;">الأمن في الذكاء الاصطناعي</button>
 </div>
 
 <div class="blogs-grid">
