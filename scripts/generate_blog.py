@@ -78,6 +78,18 @@ NEWS_FEEDS = [
     "https://www.exploit-db.com/rss.xml",
 ]
 
+BUGBOUNTY_FEEDS = [
+    "https://medium.com/feed/bug-bounty-writeups",
+    "https://medium.com/feed/bugbountywriteup",
+    "https://feeds.feedburner.com/PentesterLab",
+]
+
+BUGBOUNTY_KEYWORDS = [
+    "writeup", "write-up", "bug bounty", "bounty", "hackerone", "bugcrowd",
+    "XSS", "SSRF", "SQLi", "RCE", "IDOR", "CSRF", "XXE", "open redirect",
+    "account takeover", "authentication bypass", "privilege escalation"
+]
+
 
 def pick_todays_general_topic() -> dict:
     day = datetime.now(timezone.utc).timetuple().tm_yday
@@ -248,6 +260,60 @@ image: "/OffsecAR/assets/images/blogs/{topic_slug}.svg"
     return post_file
 
 
+def fetch_bugbounty_writeups() -> list[dict]:
+    """يجمع writeups من منصات Bug Bounty"""
+    items = []
+    for url in BUGBOUNTY_FEEDS:
+        try:
+            feed = feedparser.parse(url)
+            for entry in feed.entries[:5]:
+                title = entry.get("title", "")
+                summary = entry.get("summary", entry.get("description", ""))
+                combined = (title + " " + summary).lower()
+                if any(kw.lower() in combined for kw in BUGBOUNTY_KEYWORDS):
+                    items.append({
+                        "title":   title,
+                        "summary": summary[:600],
+                        "link":    entry.get("link", ""),
+                        "source":  feed.feed.get("title", ""),
+                    })
+        except Exception as e:
+            print(f"   ⚠️ {url}: {e}")
+    return items[:5]
+
+
+def generate_bugbounty_post(writeups: list[dict]) -> dict:
+    """يكتب ملخص writeup بأسلوب OffsecAR"""
+    writeups_json = json.dumps(writeups, ensure_ascii=False, indent=2)
+    prompt = f"""أنت محلل أمن هجومي متخصص في Bug Bounty، تكتب بأسلوب ثمانية العربي.
+
+من هذه الـ writeups الحديثة اختر الأبرز واكتب مقالة تقنية عربية عنها:
+{writeups_json}
+
+المقالة يجب أن:
+- تشرح الثغرة المكتشفة بوضوح (النوع، التأثير، كيف تعمل)
+- تصف خطوات الاكتشاف باختصار
+- تقدم الدروس المستفادة للـ Bug Hunter
+- تضع السياق الأمني الأشمل
+- تذكر المنصة والباحث والمكافأة إن توفرت
+- تضع رابط المصدر في النهاية
+
+أرجع JSON فقط:
+{{
+  "title": "عنوان تقني مشوق (15-20 كلمة)",
+  "excerpt": "مقدمة جذابة (3-4 جمل)",
+  "read_time": "وقت القراءة بالدقائق (رقم)",
+  "body": "المقالة الكاملة بصيغة Markdown، 600-900 كلمة، 4-5 أقسام بـ ##",
+  "tags": ["Bug Bounty", "ثغرات", "تاق3"],
+  "source_title": "عنوان الـ writeup الأصلي",
+  "source_url": "رابط المصدر"
+}}"""
+    resp = client.messages.create(model="claude-sonnet-4-5", max_tokens=3000,
+                                   messages=[{"role": "user", "content": prompt}])
+    raw = re.sub(r"^```json\s*|```$", "", resp.content[0].text.strip(), flags=re.MULTILINE).strip()
+    return json.loads(raw)
+
+
 def main():
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     print(f"📚 توليد مقالات {date_str}...\n")
@@ -278,7 +344,7 @@ def main():
         print(f"   ⚠️ {e}")
 
     # ── ٣. مقالة من أخبار اليوم ─────────────────────────────────────────
-    print(f"\n[3/3] تحليل أخبار — من الإنترنت")
+    print(f"\n[3/4] تحليل أخبار — من الإنترنت")
     try:
         news = fetch_latest_news()
         if news:
@@ -291,7 +357,21 @@ def main():
     except Exception as e:
         print(f"   ⚠️ {e}")
 
-    print("\n✅ تم توليد المقالات الثلاث!")
+    # ── ٤. مقالة Bug Bounty Writeup ──────────────────────────────────────
+    print(f"\n[4/4] Bug Bounty Writeup — من منصات المكافأة")
+    try:
+        writeups = fetch_bugbounty_writeups()
+        if writeups:
+            content4 = generate_bugbounty_post(writeups)
+            print(f"   العنوان: {content4['title']}")
+            slug4 = f"bugbounty-{date_str}"
+            save_blog_post("Bug Bounty", slug4, content4, offset_minutes=3)
+        else:
+            print("   ⚠️ لا توجد writeups")
+    except Exception as e:
+        print(f"   ⚠️ {e}")
+
+    print("\n✅ تم توليد المقالات الأربع!")
 
 
 if __name__ == "__main__":
