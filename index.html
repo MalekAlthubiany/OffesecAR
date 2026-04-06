@@ -232,6 +232,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(12,12,12,0.96);backdrop-fi
     <a href="/OffsecAR/news">الأخبار</a>
     <a href="/OffsecAR/blogs">مقالات</a>
     <a href="/OffsecAR/ai-security">الأمن الهجومي في الذكاء الاصطناعي</a>
+    <a href="/OffsecAR/about">من نحن</a>
   </div>
 </nav>
 
@@ -300,46 +301,21 @@ nav{position:sticky;top:0;z-index:100;background:rgba(12,12,12,0.96);backdrop-fi
   <!-- أخبار اليوم -->
   <main class="posts-col fade-up d3">
     <div class="section-hdr">
-      <span class="section-title-sm">أخبار اليوم</span>
-      <a href="/OffsecAR/blogs" class="section-link">Blogs ←</a>
+      <span class="section-title-sm">LATEST POSTS</span>
+      <a href="/OffsecAR/news" class="section-link">كل الأخبار ←</a>
     </div>
 
-    {% assign today = site.time | date: "%Y-%m-%d" %}
-    {% assign todays_posts = site.posts | where_exp: "p", "p.date contains today" %}
-    {% if todays_posts.size > 0 %}
-      {% for post in todays_posts limit:10 %}
-      <article class="post-item" onclick="location.href='{{ post.url | prepend: site.baseurl }}'">
-        <div class="post-num">{{ forloop.index | prepend: "0" | slice: -2, 2 }}</div>
-        <div>
-          <div class="post-item-title">{{ post.title }}</div>
-          <div class="post-item-meta">{{ post.date | date: "%d %b %Y" }} · {{ post.category }}</div>
-        </div>
-        {% if post.severity %}
-        <span class="post-badge sev-{{ post.severity_en }}">{{ post.severity }}</span>
-        {% endif %}
-      </article>
-      {% endfor %}
-    {% else %}
-      <div style="padding:24px 0;color:var(--muted);font-size:14px;border:none;outline:none;">لا توجد أخبار اليوم بعد — تعال لاحقاً</div>
-    {% endif %}
-
-    <div class="section-hdr" style="margin-top:40px;padding-top:32px;border-top:1px solid var(--border)">
-      <span class="section-title-sm">أخبار سابقة</span>
-    </div>
-    {% for post in site.posts limit:10 offset:1 %}
-      {% assign post_date = post.date | date: "%Y-%m-%d" %}
-      {% if post_date != today %}
-      <article class="post-item" onclick="location.href='{{ post.url | prepend: site.baseurl }}'">
-        <div class="post-num">{{ forloop.index | prepend: "0" | slice: -2, 2 }}</div>
-        <div>
-          <div class="post-item-title">{{ post.title }}</div>
-          <div class="post-item-meta">{{ post.date | date: "%d %b %Y" }} · {{ post.category }}</div>
-        </div>
-        {% if post.severity %}
-        <span class="post-badge sev-{{ post.severity_en }}">{{ post.severity }}</span>
-        {% endif %}
-      </article>
+    {% for post in site.posts limit:10 %}
+    <article class="post-item" onclick="location.href='{{ post.url | prepend: site.baseurl }}'">
+      <div class="post-num">{{ forloop.index | prepend: "0" | slice: -2, 2 }}</div>
+      <div>
+        <div class="post-item-title">{{ post.title }}</div>
+        <div class="post-item-meta">{{ post.date | date: "%d %b %Y" }} · {{ post.category }}</div>
+      </div>
+      {% if post.severity %}
+      <span class="post-badge sev-{{ post.severity_en }}">{{ post.severity }}</span>
       {% endif %}
+    </article>
     {% endfor %}
   </main>
 
