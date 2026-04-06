@@ -66,8 +66,49 @@ def post_url(date_str, stem):
     y,m,d = date_str.split("-")
     return f"{SITE_URL}/{y}/{m}/{d}/{slug}/"
 
-def blog_url(slug):
-    return f"{SITE_URL}/blogs/{slug}/"
+def blog_url(slug, filename_stem=""):
+    """يبني رابط المقالة — Jekyll يستخدم slug من front matter مباشرة"""
+    # Jekyll يستخدم الـ slug كـ permalink إن وُجد في front matter
+    s = slug.strip() if slug else ""
+    if not s and filename_stem:
+        # fallback: أزل التاريخ من اسم الملف
+        s = filename_stem[11:] if len(filename_stem) > 11 else filename_stem
+    return f"{SITE_URL}/blogs/{s}/" if s else SITE_URL
+
+
+def _hashtags(text: str, platform: str = "twitter") -> str:
+    """يولّد هاشتاقات ذكية من محتوى الخبر"""
+    tags = ["#OffsecAR"]
+    t = text.lower()
+
+    # تقني
+    if any(x in t for x in ["rce","remote code","تنفيذ أوامر","command"]): tags.append("#RCE")
+    if any(x in t for x in ["sql","injection","حقن"]): tags.append("#SQLi")
+    if any(x in t for x in ["xss","cross site","سكريبت"]): tags.append("#XSS")
+    if any(x in t for x in ["zero-day","zero day","يوم صفر","0day"]): tags.append("#ZeroDay")
+    if any(x in t for x in ["ransomware","فدية","ransom"]): tags.append("#Ransomware")
+    if any(x in t for x in ["phishing","تصيد","phish"]): tags.append("#Phishing")
+    if any(x in t for x in ["apt","متقدم مستمر","advanced persistent"]): tags.append("#APT")
+    if any(x in t for x in ["cve-"]): tags.append("#CVE")
+
+    # منتجات
+    if "cisco" in t: tags.append("#Cisco")
+    if "microsoft" in t or "windows" in t: tags.append("#Microsoft")
+    if "wordpress" in t: tags.append("#WordPress")
+    if "fortinet" in t or "forticlient" in t: tags.append("#Fortinet")
+    if "apache" in t: tags.append("#Apache")
+    if "linux" in t: tags.append("#Linux")
+    if "android" in t: tags.append("#Android")
+    if "chrome" in t or "browser" in t: tags.append("#Browser")
+
+    # عام
+    tags.append("#أمن_المعلومات")
+    if platform == "linkedin":
+        tags += ["#CyberSecurity", "#RedTeam", "#السعودية"]
+    else:
+        tags += ["#RedTeam", "#Cybersecurity"]
+
+    return " ".join(dict.fromkeys(tags))  # بدون تكرار
 
 
 def send_news(fm, date_str, stem, idx, total):
@@ -113,7 +154,7 @@ def send_news(fm, date_str, stem, idx, total):
         + f"{body[:350]}...\n\n"
         + (f"المصدر: {source_url}\n" if source_url and source_url not in ("","None") else "")
         + f"اقرأ التحليل: {url}\n\n"
-        f"#أمن_المعلومات #OffsecAR #RedTeam #Cybersecurity"
+        + _hashtags(title + " " + category + " " + (cve or ""))
     )
     tg_doc(img, f"<b>🐦 Twitter / X</b>")
     tg(f"<b>🐦 نص التغريدة — انسخ والصق:</b>\n\n<code>{tw_post[:950]}</code>")
@@ -127,7 +168,7 @@ def send_news(fm, date_str, stem, idx, total):
         + (f"📎 المصدر الأصلي: {source_url}\n" if source_url and source_url not in ("","None") else "")
         + f"📖 التحليل الكامل: {url}\n\n"
         f"OffsecAR — الأمن الهجومي بالعربي يومياً\n"
-        f"#أمن_المعلومات #OffsecAR #CyberSecurity #RedTeam #السعودية"
+        + _hashtags(title + " " + category + " " + (cve or ""), platform="linkedin")
     )
     tg(f"<b>💼 نص LinkedIn — انسخ والصق:</b>\n\n<code>{li_post[:1000]}</code>")
 
@@ -150,7 +191,7 @@ def send_blog(fm, idx, total):
     body      = fm.get("_body","")
     excerpt   = fm.get("excerpt", body[:300])
     slug      = fm.get("slug","")
-    url       = blog_url(slug)
+    url       = blog_url(slug)  # slug من front matter أدق
 
     # ── صورة ──
     img = TMP / f"blog_{idx}.png"
@@ -181,7 +222,7 @@ def send_blog(fm, idx, total):
         f"{excerpt[:250]}...\n\n"
         + (f"⏱ {read_time} دقائق قراءة\n\n" if read_time else "")
         + f"🔗 {url}\n\n"
-        f"#أمن_المعلومات #OffsecAR #RedTeam"
+        + _hashtags(title + " " + category)
     )
     tg_doc(img, f"<b>🐦 Twitter / X</b>")
     tg(f"<b>🐦 نص التغريدة:</b>\n\n<code>{tw_post[:900]}</code>")
@@ -193,7 +234,7 @@ def send_blog(fm, idx, total):
         + (f"⏱ وقت القراءة: {read_time} دقائق\n" if read_time else "")
         + f"📖 اقرأ المقالة كاملة: {url}\n\n"
         f"OffsecAR — الأمن الهجومي بالعربي\n"
-        f"#أمن_المعلومات #OffsecAR #CyberSecurity"
+        + _hashtags(title + " " + category, platform="linkedin")
     )
     tg(f"<b>💼 نص LinkedIn:</b>\n\n<code>{li_post[:1000]}</code>")
 
