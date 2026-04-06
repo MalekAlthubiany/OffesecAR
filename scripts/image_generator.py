@@ -142,7 +142,7 @@ async def _shoot(html, out):
         f.write(html); tmp = f.name
     async with async_playwright() as p:
         br = await p.chromium.launch(args=['--no-sandbox','--disable-gpu'])
-        pg = await br.new_page(viewport={'width':1040,'height':2000})
+        pg = await br.new_page(viewport={'width':1040,'height':3000})
         await pg.goto(f'file://{tmp}', wait_until='networkidle')
         await pg.wait_for_timeout(2500)
         h = await pg.evaluate('document.body.scrollHeight')
