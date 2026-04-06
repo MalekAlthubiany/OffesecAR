@@ -19,7 +19,7 @@ def _logo_src():
             return f'file://{p.resolve()}'
     return ''
 
-def _build_html(title, category, severity, cvss, cve, desc, actions,
+def _build_html(title, category, severity, cvss, cve, desc, body_text,
                 fix, fix_sub, impact, impact_sub, vector, vector_sub,
                 date_str, ref):
 
@@ -28,16 +28,12 @@ def _build_html(title, category, severity, cvss, cve, desc, actions,
     cvss_w   = f'{min(cvss_f/10*100, 100):.0f}%'
     sev_color = '#b3261e' if severity in ('حرجة',) else '#d97c38' if severity == 'عالية' else '#888'
 
-    actions_html = ''
-    arabic_nums  = ['١','٢','٣','٤','٥','٦']
-    for i, act in enumerate(actions):
-        col = f'color:{sev_color};font-weight:600;' if i == 1 else ''
-        num_col = sev_color if i == 1 else sev_color
-        actions_html += f'''
-        <div class="action-item">
-          <span class="action-num" style="color:{num_col}">{arabic_nums[i]}.</span>
-          <span class="action-text" style="{col}">{act}</span>
-        </div>'''
+    # تحويل body_text إلى فقرات HTML
+    paragraphs = [p.strip() for p in body_text.split('\n') if p.strip()][:8]
+    body_html = ''.join(
+        f'<p style="margin-bottom:12px;font-size:18px;color:#444;line-height:1.7;">{p}</p>'
+        for p in paragraphs
+    )
 
     return f"""<!DOCTYPE html>
 <html dir="rtl" lang="ar"><head>
@@ -160,11 +156,11 @@ def _render(html, out):
         print(f'   ⚠️ {e}')
 
 
-def make_advisory(title, category, severity, cvss, cve, desc,
-                  actions, fix, fix_sub, impact, impact_sub,
+def make_advisory(title, category, severity, cvss, cve, desc, body_text,
+                  fix, fix_sub, impact, impact_sub,
                   vector, vector_sub, date_str, ref, out):
-    html = _build_html(title, category, severity, cvss, cve, desc,
-                       actions, fix, fix_sub, impact, impact_sub,
+    html = _build_html(title, category, severity, cvss, cve, desc, body_text,
+                       fix, fix_sub, impact, impact_sub,
                        vector, vector_sub, date_str, ref)
     _render(html, out)
     return Path(out)
