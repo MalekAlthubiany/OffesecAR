@@ -76,40 +76,6 @@ def blog_url(slug, filename_stem=""):
     return f"{SITE_URL}/blogs/{s}/" if s else SITE_URL
 
 
-def _hashtags(text: str, platform: str = "twitter") -> str:
-    """يولّد هاشتاقات ذكية من محتوى الخبر"""
-    tags = ["#OffsecAR"]
-    t = text.lower()
-
-    # تقني
-    if any(x in t for x in ["rce","remote code","تنفيذ أوامر","command"]): tags.append("#RCE")
-    if any(x in t for x in ["sql","injection","حقن"]): tags.append("#SQLi")
-    if any(x in t for x in ["xss","cross site","سكريبت"]): tags.append("#XSS")
-    if any(x in t for x in ["zero-day","zero day","يوم صفر","0day"]): tags.append("#ZeroDay")
-    if any(x in t for x in ["ransomware","فدية","ransom"]): tags.append("#Ransomware")
-    if any(x in t for x in ["phishing","تصيد","phish"]): tags.append("#Phishing")
-    if any(x in t for x in ["apt","متقدم مستمر","advanced persistent"]): tags.append("#APT")
-    if any(x in t for x in ["cve-"]): tags.append("#CVE")
-
-    # منتجات
-    if "cisco" in t: tags.append("#Cisco")
-    if "microsoft" in t or "windows" in t: tags.append("#Microsoft")
-    if "wordpress" in t: tags.append("#WordPress")
-    if "fortinet" in t or "forticlient" in t: tags.append("#Fortinet")
-    if "apache" in t: tags.append("#Apache")
-    if "linux" in t: tags.append("#Linux")
-    if "android" in t: tags.append("#Android")
-    if "chrome" in t or "browser" in t: tags.append("#Browser")
-
-    # عام
-    tags.append("#أمن_المعلومات")
-    if platform == "linkedin":
-        tags += ["#CyberSecurity", "#RedTeam", "#السعودية"]
-    else:
-        tags += ["#RedTeam", "#Cybersecurity"]
-
-    return " ".join(dict.fromkeys(tags))  # بدون تكرار
-
 
 def send_news(fm, date_str, stem, idx, total):
     title      = fm.get("title","")
@@ -133,7 +99,7 @@ def send_news(fm, date_str, stem, idx, total):
     try:
         make_advisory(
             title, category, severity, cvss, cve,
-            excerpt, actions,
+            excerpt, body,
             'آخر إصدار', 'تحديث فوري مطلوب',
             'تنفيذ أوامر عن بعد', 'وصول غير مصرح',
             'الشبكة', 'بدون مصادقة',
@@ -154,7 +120,7 @@ def send_news(fm, date_str, stem, idx, total):
         + f"{body[:350]}...\n\n"
         + (f"المصدر: {source_url}\n" if source_url and source_url not in ("","None") else "")
         + f"اقرأ التحليل: {url}\n\n"
-        + _hashtags(title + " " + category + " " + (cve or ""))
+
     )
     tg_doc(img, f"<b>🐦 Twitter / X</b>")
     tg(f"<b>🐦 نص التغريدة — انسخ والصق:</b>\n\n<code>{tw_post[:950]}</code>")
@@ -168,18 +134,18 @@ def send_news(fm, date_str, stem, idx, total):
         + (f"📎 المصدر الأصلي: {source_url}\n" if source_url and source_url not in ("","None") else "")
         + f"📖 التحليل الكامل: {url}\n\n"
         f"OffsecAR — الأمن الهجومي بالعربي يومياً\n"
-        + _hashtags(title + " " + category + " " + (cve or ""), platform="linkedin")
+
     )
     tg(f"<b>💼 نص LinkedIn — انسخ والصق:</b>\n\n<code>{li_post[:1000]}</code>")
 
     # ── WhatsApp ──
     wa_post = (
         f"*{title}*\n\n"
-        + (f"⚠️ {sev_tag}" + (f"  |  {cvss_tag}" if cvss_tag else "") + "\n\n" if sev_tag else "")
-        + f"{body[:400]}\n\n"
-        + (f"🔗 المصدر: {source_url}\n" if source_url and source_url not in ("","None") else "")
-        + f"📖 {url}\n\n"
-        f"_OffsecAR — الأمن الهجومي بالعربي_"
+        + (f"{sev_tag}" + (f"  |  {cvss_tag}" if cvss_tag else "") + "\n\n" if sev_tag else "")
+        + body[:2000]
+        + (f"\n\nالمصدر: {source_url}" if source_url and source_url not in ("","None") else "")
+        + f"\n{url}"
+        + "\n\nOffsecAR"
     )
     tg(f"<b>💬 نص WhatsApp — انسخ والصق:</b>\n\n<code>{wa_post[:800]}</code>")
 
@@ -222,7 +188,7 @@ def send_blog(fm, idx, total):
         f"{excerpt[:250]}...\n\n"
         + (f"⏱ {read_time} دقائق قراءة\n\n" if read_time else "")
         + f"🔗 {url}\n\n"
-        + _hashtags(title + " " + category)
+
     )
     tg_doc(img, f"<b>🐦 Twitter / X</b>")
     tg(f"<b>🐦 نص التغريدة:</b>\n\n<code>{tw_post[:900]}</code>")
@@ -234,15 +200,15 @@ def send_blog(fm, idx, total):
         + (f"⏱ وقت القراءة: {read_time} دقائق\n" if read_time else "")
         + f"📖 اقرأ المقالة كاملة: {url}\n\n"
         f"OffsecAR — الأمن الهجومي بالعربي\n"
-        + _hashtags(title + " " + category, platform="linkedin")
+
     )
     tg(f"<b>💼 نص LinkedIn:</b>\n\n<code>{li_post[:1000]}</code>")
 
     wa_post = (
         f"*{title}*\n\n"
-        f"{excerpt[:400]}\n\n"
-        f"📖 {url}\n\n"
-        f"_OffsecAR_"
+        + body[:2000]
+        + f"\n\n{url}"
+        + "\n\nOffsecAR"
     )
     tg(f"<b>💬 نص WhatsApp:</b>\n\n<code>{wa_post[:800]}</code>")
 
