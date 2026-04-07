@@ -116,8 +116,8 @@ body{{width:1040px;background:#f9f9f9;font-family:'Tajawal',sans-serif;direction
   <span class="active">● نشط</span>
 </div>
 <hr class="sep">
-<div class="action-title">إجراء مطلوب فوراً</div>
-<div class="actions-box">{actions_html}</div>
+<div class="action-title">التفاصيل الكاملة</div>
+<div class="actions-box">{body_html}</div>
 <div class="footer">
   <div class="footer-brand">
     {'<img class="footer-logo" src="' + logo_src + '">' if logo_src else ''}
