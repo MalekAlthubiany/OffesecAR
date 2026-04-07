@@ -93,7 +93,7 @@ body{{width:1040px;background:#f9f9f9;font-family:'Tajawal',sans-serif;direction
 <div class="main-sub">{category}</div>
 <div class="cve-bar">
   <span class="cve-num">{cve if cve and cve not in ('','None') else 'CVE غير محدد'}</span>
-  <span class="cve-sev"><span class="cve-dot"></span> الخطورة: {severity}</span>
+  <span class="cve-sev"><span class="cve-dot"></span> الخطورة: {severity if severity and severity not in ("","None") else "غير محددة"}</span>
 </div>
 <hr class="sep">
 <div class="section-label">الوصف</div>
@@ -126,10 +126,7 @@ body{{width:1040px;background:#f9f9f9;font-family:'Tajawal',sans-serif;direction
       <span class="footer-handle">@OffsecAR  ·  {SITE}</span>
     </div>
   </div>
-  <div class="footer-meta">
-    <span class="footer-ref">{ref}</span>
-    <span class="footer-ref">TLP: CLEAR</span>
-  </div>
+
 </div>
 </div></body></html>"""
 
