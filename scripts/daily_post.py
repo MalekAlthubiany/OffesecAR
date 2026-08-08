@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 OffsecAR — نشر ذكي
-ينشر فقط عندما يوجد خبر يستحق انتباه الناس فعلاً
 """
 
 import os, json, re, feedparser
